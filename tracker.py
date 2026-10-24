@@ -532,48 +532,47 @@ def public_url():
 def build_web_data():
     """汇总历史价格，供网页看板与静态导出使用。
 
-    实测(method≠估算回填)与估算分开：价格/涨跌/高低点/天数只用实测；
-    估算日期仅并入 history 供走势图展示（前端以虚线区分），real_from 为首个实测日。
+    白菜价/涨跌/建议等统计使用完整30天序列（含估算回填段，用户已确认采用）；
+    real_from 记录首个实测日，仅用于走势图区分虚线/实线。
     """
     cfg = load_config()
     hist = read_history()
     jd_latest = read_jd_latest()
     today = dt.date.today().isoformat()
-    items, real_dates_all, total_rows = [], set(), 0
+    items, all_dates, total_rows = [], set(), 0
     for it in cfg["items"]:
         raw_h = hist.get(it["name"], [])
         total_rows += len(raw_h)
         by_date, by_hour, real_dates = {}, {}, set()
         for d, p, t, m in raw_h:
-            if m != "估算回填":           # 实测：覆盖估算，驱动全部统计
-                real_dates.add(d)
+            if m == "估算回填":
+                by_date.setdefault(d, p)      # 实测优先，估算只补空白日
+            else:
                 by_date[d] = p
-                real_dates_all.add(d)
+                real_dates.add(d)
                 if d == today:
                     by_hour[t[:2] or "00"] = p
-            elif d not in real_dates:      # 估算：仅补走势图空白日
-                by_date[d] = p
+            all_dates.add(d)
         h = [(d, by_date[d]) for d in sorted(by_date)]
-        rh = [(d, by_date[d]) for d in sorted(real_dates)]
-        prices = [p for _, p in rh]
+        prices = [p for _, p in h]
         recent = h[-120:]
-        price = rh[-1][1] if rh else None
-        prev = rh[-2][1] if len(rh) > 1 else None
+        price = h[-1][1] if h else None
+        prev = h[-2][1] if len(h) > 1 else None
         items.append({
             "name": it["name"], "url": it["url"], "cat": category_of(it["url"]),
             "price": price, "prev": prev,
             "pct": round((price - prev) / prev * 100, 2) if prev else None,
             "low": min(prices) if prices else None,
             "high": max(prices) if prices else None,
-            "days": len(rh),
-            "real_from": rh[0][0] if rh else None,
+            "days": len(h),
+            "real_from": min(real_dates) if real_dates else None,
             "jd": jd_latest.get(it["name"]),
             "today": [{"h": k + ":00", "p": v} for k, v in sorted(by_hour.items())],
             "history": [{"d": d, "p": p} for d, p in recent],
         })
     return {"updated": dt.datetime.now(dt.timezone(dt.timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
             "public_url": public_url(),
-            "stats": {"records": total_rows, "days": len(real_dates_all), "items": len(items)},
+            "stats": {"records": total_rows, "days": len(all_dates), "items": len(items)},
             "items": items}
 
 
@@ -642,10 +641,9 @@ def write_ai_note(model, tracked):
     cands = []
     for r in tracked:
         h = r.get("history") or []
-        real = [x for x in h if x[3] != "估算回填"]
-        if len(real) < 2:
+        if len(h) < 2:
             continue
-        low = min(x[1] for x in real)
+        low = min(x[1] for x in h)
         if r["price"] <= low * 1.01:
             cands.append(f"{r['name']}：现价{r['price']:,.0f}元≈历史低{low:,.0f}元")
     cands = cands[:10]
@@ -827,6 +825,46 @@ def cmd_backfill(args):
     return 0
 
 
+def fetch_jd_prices(items):
+    """抓一批商品详情页上的京东价，返回 (rows, 成功数)。"""
+    today = dt.date.today().isoformat()
+    now_t = dt.datetime.now().strftime("%H:%M:%S")
+    rows, got = [], 0
+    for it in items:
+        try:
+            flat = re.sub(r"\s+", " ", fetch_url(it["url"]))
+            m = JD_RE.search(flat)
+            if m:
+                p = _num(m.group(1))
+                if p:
+                    rows.append({"date": today, "time": now_t,
+                                 "name": it["name"], "price": p})
+                    got += 1
+        except Exception:
+            pass
+        time.sleep(0.5)
+    return rows, got
+
+
+def cmd_jd_sweep(args):
+    """京东渠道全量补扫：一次抓完所有带京东模块的商品（CPU/显卡/主板），并刷新网页数据。"""
+    cfg = load_config()
+    zol_items = [it for it in cfg["items"] if slug_of(it["url"]) in JD_CATS]
+    if not zol_items:
+        log("没有可扫的京东渠道商品")
+        return 0
+    log(f"京东全量补扫: {len(zol_items)} 款开始…")
+    rows, got = fetch_jd_prices(zol_items)
+    if rows:
+        append_jd_rows(rows)
+    log(f"京东全量补扫完成: {got}/{len(zol_items)} 款")
+    try:
+        cmd_web_export(args)
+    except Exception as e:
+        log(f"补扫后网页数据导出失败: {e}")
+    return 0
+
+
 def cmd_run(args):
     cfg = load_config()
     os.makedirs(LOGS_DIR, exist_ok=True)
@@ -901,20 +939,7 @@ def cmd_run(args):
         hour_idx = dt.datetime.now().hour
         block = [zol_items[(hour_idx * JD_PER_RUN + i) % len(zol_items)]
                  for i in range(min(JD_PER_RUN, len(zol_items)))]
-        jd_rows, got = [], 0
-        for it in block:
-            try:
-                flat = re.sub(r"\s+", " ", fetch_url(it["url"]))
-                m = JD_RE.search(flat)
-                if m:
-                    p = _num(m.group(1))
-                    if p:
-                        jd_rows.append({"date": today, "time": now_t,
-                                        "name": it["name"], "price": p})
-                        got += 1
-            except Exception:
-                pass
-            time.sleep(0.5)
+        jd_rows, got = fetch_jd_prices(block)
         log(f"京东渠道: 本轮 {got}/{len(block)} 款")
         if jd_rows:
             append_jd_rows(jd_rows)
@@ -1132,14 +1157,15 @@ def main():
     sub.add_parser("report", help="根据已有数据重新生成报告")
     sub.add_parser("refresh-catalog", help="从ZOL十大品类重建全量监控目录")
     sub.add_parser("web-export", help="导出网页看板数据(web/data.json)")
-    sub.add_parser("backfill", help="用Wayback快照回填近30天真实历史价")
+    sub.add_parser("backfill", help="回填近30天历史（快照+估算标注)")
+    sub.add_parser("jd-sweep", help="京东渠道全量补扫")
 
     args = parser.parse_args()
     cmd = args.cmd or "run"
     os.makedirs(DATA_DIR, exist_ok=True)
     return {"run": cmd_run, "list": cmd_list, "add": cmd_add, "remove": cmd_remove,
             "test": cmd_test, "model-setup": cmd_model_setup, "report": cmd_report,
-            "refresh-catalog": cmd_refresh_catalog, "backfill": cmd_backfill,
+            "refresh-catalog": cmd_refresh_catalog, "backfill": cmd_backfill, "jd-sweep": cmd_jd_sweep,
             "web-export": cmd_web_export}[cmd](args)
 
 
