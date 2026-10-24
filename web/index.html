@@ -148,12 +148,13 @@ async function load(){
 }
 
 function stats(it){
-  const v=(it.history||[]).map(h=>h.p);
+  const rf=it.real_from||'9999-12-31';
+  const v=(it.history||[]).filter(h=>h.d>=rf).map(h=>h.p);
   const last30=v.slice(-30);
   const min=Math.min(...v),max=Math.max(...v);
   const avg30=last30.length?last30.reduce((a,b)=>a+b,0)/last30.length:null;
   const pct30=(last30.length>1)?(v[v.length-1]-last30[0])/last30[0]*100:null;
-  const gap=(min>0)?(it.price-min)/min*100:null;
+  const gap=(min>0&&v.length)?(it.price-min)/min*100:null;
   return {min,max,avg30,pct30,gap,len:v.length};
 }
 
@@ -222,7 +223,7 @@ function render(){
     `<span>你已访问 <b>${visits}</b> 次</span>`+
     `<span>收藏 <b>${FAVS.size}</b> 款</span>`;
   document.getElementById('foot').innerHTML=
-    `数据来源: ZOL 参考报价 + 京东渠道价 · 历史价格由 Internet Archive 网页快照回填 · GitHub 服务器每小时自动更新<br>🥬 白菜价=记录期最低价 · 建议与推荐由 Qwen2.5-3B 模型每日自动生成，仅供参考`;
+    `数据来源: ZOL 参考报价 + 京东渠道价 · GitHub 服务器每小时自动更新 · 🥬 白菜价=实测记录期最低价<br>走势图中<b>虚线段为估算回填</b>（真实历史存档不足，仅示意趋势）；价格、涨跌、白菜价与建议<b>只用实测数据</b> · 推荐由 Qwen2.5-3B 每日自动生成`;
 }
 
 const card=(n,t,c)=>`<div class="card"><div class="n" ${c?`style="color:${c}"`:''}>${n}</div><div class="t">${t}</div></div>`;
@@ -320,6 +321,20 @@ function drawChart(){
        `<text x="${W-R}" y="${ay-5}" text-anchor="end" font-size="10.5" fill="#7a8b3c">30天均价 ${fmt(s.avg30)}</text>`;
   }
   const pts=vals.map((p,i)=>`${X(i).toFixed(1)},${Y(p).toFixed(1)}`).join(' ');
+  const rf=it.real_from;
+  let estLine='', startIdx=0;
+  if(rf){
+    const estIdx=[];
+    hist.forEach((hh,i)=>{if(hh.d<rf)estIdx.push(i);});
+    if(estIdx.length){
+      startIdx=Math.max(...estIdx)+1;
+      if(startIdx<hist.length){
+        const ePts=vals.slice(0,startIdx+1).map((p,i)=>`${X(i).toFixed(1)},${Y(p).toFixed(1)}`).join(' ');
+        estLine=`<polyline points="${ePts}" fill="none" stroke="#a9b6cc" stroke-width="2" stroke-dasharray="6 5" stroke-linejoin="round"/>`;
+      }
+    }
+  }
+  const realPts=vals.slice(startIdx).map((p,i)=>`${X(i+startIdx).toFixed(1)},${Y(p).toFixed(1)}`).join(' ');
   const area=hist.length>1?`<polygon points="${X(0)},${H-B} ${pts} ${X(vals.length-1)},${H-B}" fill="${color}" opacity="0.07"/>`:'';
   const dot=`<circle cx="${X(vals.length-1)}" cy="${Y(vals[vals.length-1])}" r="3.5" fill="${color}"/>`;
   let hover='';
@@ -332,7 +347,7 @@ function drawChart(){
     tt.style.left=Math.min(Math.max(X(i)/W*100,8),90)+'%';tt.style.top='6px';
     tt.innerHTML=`<b>${esc(hist[i].d)}</b>　${fmt(vals[i])}`;
   }else document.getElementById('tooltip').style.display='none';
-  svg.innerHTML=g+area+`<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linejoin="round"/>`+dot+hover;
+  svg.innerHTML=g+area+estLine+(realPts?`<polyline points="${realPts}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linejoin="round"/>`:'')+dot+hover;
   svg.onmousemove=e=>{
     const rect=svg.getBoundingClientRect();
     const x=(e.clientX-rect.left)/rect.width*W;
