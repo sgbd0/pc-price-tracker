@@ -3,84 +3,87 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>电脑配件价格看板</title>
+<title>装机价格雷达 · 电脑配件价格看板</title>
 <style>
-:root{--up:#d9412f;--down:#1f9d55;--flat:#8a93a3;--bg:#f4f6fa;--card:#fff;--line:#e8ecf2;--txt:#1c2330;--sub:#68738a;--acc:#2456c4;--jd:#e1251b}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:"Microsoft YaHei",system-ui,-apple-system,sans-serif}
-.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
-header{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:14px}
-h1{font-size:21px;margin:0}
-.meta{color:var(--sub);font-size:13px}
-.badge{font-size:12px;border-radius:999px;padding:3px 10px;background:#eef6ff;color:#1a63c9;border:1px solid #d5e6ff}
-.pub{font-size:12.5px;background:#eef4ff;border:1px solid #d5e3ff;border-radius:999px;padding:3px 12px;color:var(--acc);text-decoration:none}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:10px;margin-bottom:12px}
-.card{background:var(--card);border-radius:12px;padding:12px 16px;box-shadow:0 1px 3px rgba(16,24,40,.06)}
-.card .n{font-size:23px;font-weight:700}.card .t{color:var(--sub);font-size:12px;margin-top:2px}
-.banner{background:linear-gradient(90deg,#f0f9f1,#eef4ff);border:1px solid #d8ead9;border-radius:12px;padding:12px 16px;font-size:13.5px;line-height:1.7;margin-bottom:12px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-@media(max-width:720px){.grid2{grid-template-columns:1fr}}
-.panel{background:var(--card);border-radius:12px;box-shadow:0 1px 3px rgba(16,24,40,.06);padding:14px 16px;margin-bottom:12px}
-.panel h2{font-size:15px;margin:0 0 10px}
+:root{--up:#e04545;--down:#189a5c;--flat:#8a93a3;--bg:#f5f6fa;--card:#fff;--line:#e9ecf3;--txt:#1b2233;--sub:#6b7690;--acc:#3d5afe;--jd:#e1251b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:"Microsoft YaHei",system-ui,-apple-system,sans-serif}
+.topbar{background:linear-gradient(120deg,#1c2640,#2c3e6e 55%,#3d5afe22);color:#fff;padding:18px 0 46px}
+.topbar .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.topbar h1{font-size:20px;margin:0;letter-spacing:.5px}
+.topbar .meta{color:#c6d2f2;font-size:12.5px}
+.chip{font-size:12px;border-radius:999px;padding:3px 10px;background:#ffffff22;border:1px solid #ffffff33;color:#e8eeff}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+.body{max-width:1100px;margin:-34px auto 0;padding:0 16px 48px}
+.panel{background:var(--card);border-radius:14px;box-shadow:0 2px 10px rgba(22,32,64,.07);padding:16px;margin-bottom:14px}
+.panel h2{font-size:14.5px;margin:0 0 10px}
+.hero{background:linear-gradient(120deg,#ffffff,#f2f5ff);border:1px solid #dde5ff}
+.hero .tag{display:inline-block;font-size:11px;color:#fff;background:var(--acc);border-radius:4px;padding:1px 7px;margin-right:8px;vertical-align:2px}
+.focus{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;font-size:16px;margin:4px 0 8px}
+.focus b{font-size:19px}
+.hero .sum{color:#3c4763;font-size:13.5px;line-height:1.7}
+.picks{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
+.picks span{font-size:12.5px;background:#eef3ff;border:1px solid #d9e4ff;border-radius:999px;padding:4px 12px;color:#2a3c8f}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:10px;margin-bottom:14px}
+.card{background:var(--card);border-radius:14px;padding:12px 15px;box-shadow:0 2px 10px rgba(22,32,64,.07)}
+.card .n{font-size:22px;font-weight:700}.card .t{color:var(--sub);font-size:11.5px;margin-top:2px}
 .ranks{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.ranks .rk{font-size:13px}
-.rk div{padding:4px 0;border-bottom:1px dashed #eef1f6;cursor:pointer;display:flex;justify-content:space-between;gap:8px}
+@media(max-width:720px){.ranks{grid-template-columns:1fr}}
+.rk{font-size:13px}.rk div{padding:4px 0;border-bottom:1px dashed #eef1f6;cursor:pointer;display:flex;justify-content:space-between;gap:8px}
 .rk div:hover{background:#f6f9ff}
-.rk b{font-size:12px;color:var(--sub);font-weight:600}
 .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
-input[type=search],select,button.btn{font-size:13px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--txt)}
+input[type=search],select,button.btn{font-size:13px;padding:6px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--txt)}
 input[type=search]{min-width:160px;flex:1;max-width:280px}
 button.btn{cursor:pointer}button.btn:hover{border-color:var(--acc);color:var(--acc)}
-.range button{font-size:13px;padding:5px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer}
+.range button{font-size:13px;padding:5px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer}
 .range button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 #chart-box{position:relative}
-#tooltip{position:absolute;pointer-events:none;background:#101828;color:#fff;font-size:12px;padding:6px 10px;border-radius:8px;display:none;white-space:nowrap;z-index:5}
-.tblwrap{max-height:640px;overflow:auto;border-radius:8px}
+#tooltip{position:absolute;pointer-events:none;background:#111828;color:#fff;font-size:12px;padding:6px 10px;border-radius:8px;display:none;white-space:nowrap;z-index:5}
+.tblwrap{max-height:640px;overflow:auto;border-radius:10px}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
-th{color:var(--sub);font-weight:600;font-size:12px;background:#f8fafc;position:sticky;top:0;z-index:2}
+th{color:var(--sub);font-weight:600;font-size:11.5px;background:#f8fafd;position:sticky;top:0;z-index:2}
 td.name{white-space:normal;min-width:230px;max-width:350px}
 .cat-tag{display:inline-block;font-size:11px;color:#fff;border-radius:4px;padding:1px 6px;margin-right:6px;vertical-align:1px}
 .star{cursor:pointer;color:#c9d2e0;font-size:15px;margin-right:4px;user-select:none}
 .star.on{color:#f5a623}
 .jdtag{font-size:11px;color:#fff;background:var(--jd);border-radius:4px;padding:1px 5px;margin-right:4px}
-tbody tr{cursor:pointer}tbody tr:hover{background:#f6f9ff}tbody tr.sel{background:#eef4ff}
+tbody tr{cursor:pointer}tbody tr:hover{background:#f6f9ff}tbody tr.sel{background:#eef3ff}
 .up{color:var(--up)}.down{color:var(--down)}.flat{color:var(--flat)}
 .price{font-weight:700}.bargain{color:#0d7a3e;font-weight:700}
 .pct{font-weight:600}
-.adv-bargain{color:#0d7a3e;font-weight:700}.adv-good{color:#1f9d55}.adv-bad{color:#d9412f}.adv-flat{color:var(--flat)}
+.adv-bargain{color:#0d7a3e;font-weight:700}.adv-good{color:#189a5c}.adv-bad{color:#e04545}.adv-flat{color:var(--flat)}
 .gap-good{color:#0d7a3e;font-weight:600}
 a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
 .count{color:var(--sub);font-size:12px;margin-left:auto}
 .statline{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--sub);font-size:12.5px;margin-top:10px}
 .statline b{color:var(--txt)}
-footer{color:var(--sub);font-size:12px;margin-top:10px;line-height:1.8}
+footer{color:var(--sub);font-size:12px;margin:12px 0 0;line-height:1.8;text-align:center}
 @media(max-width:720px){.hidem{display:none}td.name{min-width:170px}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>🖥️ 电脑配件价格看板</h1>
-    <span class="meta" id="updated"></span>
-    <span class="badge" id="daybadge"></span>
-    <a class="pub" id="pub" style="display:none" target="_blank"></a>
-  </header>
+<div class="topbar"><div class="wrap">
+  <h1>📡 装机价格雷达</h1>
+  <span class="meta" id="updated"></span>
+  <span class="chip" id="daybadge"></span>
+  <span class="chip">👁 全网 <b id="gv">…</b> 次</span>
+</div></div>
+
+<div class="body">
+  <div class="panel hero" id="aiPanel" style="display:none"></div>
 
   <div class="cards" id="cards"></div>
-  <div class="banner" id="banner">加载中…</div>
-  <div class="banner" id="aiPanel" style="display:none"></div>
 
-  <div class="grid2">
-    <div class="panel">
-      <h2>📈 今日涨幅榜 TOP5</h2><div class="rk" id="rankUp"></div>
-    </div>
-    <div class="panel">
-      <h2>📉 今日跌幅榜 TOP5</h2><div class="rk" id="rankDown"></div>
+  <div class="panel">
+    <div class="ranks">
+      <div><h2>📈 今日涨幅 TOP5</h2><div class="rk" id="rankUp"></div></div>
+      <div><h2>📉 今日跌幅 TOP5</h2><div class="rk" id="rankDown"></div></div>
     </div>
   </div>
 
   <div class="panel">
-    <h2>价格走势 <span class="meta" id="chart-title"></span></h2>
+    <h2>价格走势 <span id="chart-title" style="color:var(--sub);font-size:12px;font-weight:400"></span></h2>
     <div class="controls">
       <select id="pick"></select>
       <span class="range" id="range">
@@ -125,15 +128,14 @@ footer{color:var(--sub);font-size:12px;margin-top:10px;line-height:1.8}
 </div>
 
 <script>
-const UP='#d9412f', DOWN='#1f9d55', FLAT='#8a93a3';
+const UP='#e04545', DOWN='#189a5c', FLAT='#8a93a3';
 const CAT_COLORS={'CPU':'#5b6ee1','主板':'#8e5bd1','内存':'#d1843b','显卡':'#3ba7a0','固态硬盘':'#4f9d5d','机械硬盘':'#7a8b3c','电源':'#c26a1f','机箱':'#b05a6e','散热器':'#3c8bbf','显示器':'#c95570','配件':'#8a93a3'};
 let DATA=null, ITEMS=[], S={}, sel=0, rangeN=30, hoverX=-1, fCat='全部', fSearch='', fSort='cat', onlyFav=false;
 let FAVS=(()=>{try{return new Set(JSON.parse(localStorage.getItem('ppf')||'[]'))}catch(e){return new Set()}})();
 let visits=(+localStorage.getItem('ppv')||0)+1; localStorage.setItem('ppv',visits);
-
+const saveFavs=()=>localStorage.setItem('ppf',JSON.stringify([...FAVS]));
 const fmt=n=>n==null?'-':'¥'+n.toLocaleString('zh-CN',{maximumFractionDigits:0});
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const saveFavs=()=>localStorage.setItem('ppf',JSON.stringify([...FAVS]));
 
 async function load(){
   let r;
@@ -172,12 +174,10 @@ const pctSpan=p=>{
 };
 
 function render(){
-  document.getElementById('updated').textContent='更新于 '+(DATA.updated||'')+'（每小时自动刷新）';
+  document.getElementById('updated').textContent='更新于 '+(DATA.updated||'')+' · 每小时自动刷新';
   const st=DATA.stats||{};
   const maxDays=ITEMS.length?Math.max(...ITEMS.map(i=>i.days||1)):1;
-  document.getElementById('daybadge').textContent='记录第 '+maxDays+' 天';
-  const pub=document.getElementById('pub');
-  if(DATA.public_url){pub.style.display='';pub.href=DATA.public_url;pub.textContent='🌐 '+DATA.public_url;}
+  document.getElementById('daybadge').textContent='数据覆盖 '+maxDays+' 天';
 
   const withA=ITEMS.map(it=>({it,s:S[it.name],a:advice(it,S[it.name])}));
   const bargains=withA.filter(x=>x.a.c==='bargain');
@@ -192,24 +192,9 @@ function render(){
     card(downs.length,'今日下跌',DOWN)+
     card(pcts.length?avg.toFixed(2):'0.00','平均涨跌 %',avg<-0.05?DOWN:(avg>0.05?UP:FLAT));
 
-  const catTrend={};
-  for(const x of withA){if(x.s.pct30!=null){(catTrend[x.it.cat]=catTrend[x.it.cat]||[]).push(x.s.pct30);}}
-  const catAvg=Object.entries(catTrend).map(([c,a])=>[c,a.reduce((p,q)=>p+q,0)/a.length]).sort((a,b)=>a[1]-b[1]);
-  let bHtml=`💡 <b>购买建议</b>（规则生成，仅供参考）：`;
-  if(bargains.length){
-    const names=bargains.slice(0,4).map(x=>x.it.name).join('、')+(bargains.length>4?' 等':'');
-    bHtml+=`当前 <b>${bargains.length} 款配件已到白菜价</b>（${names}），值得关注。`;
-  }else if(maxDays<2){
-    bHtml+=`今天刚开始记录 ${ITEMS.length} 款配件的首日价格，<b>涨跌、30天趋势和白菜价判定将从第 2 天起逐日完善</b>（数据每小时更新），建议收藏本页。`;
-  }else{
-    bHtml+=`暂无配件处于白菜价。`;
-  }
-  if(catAvg.length&&maxDays>=2)bHtml+=` 板块30天动向：${catAvg.slice(0,2).map(([c,p])=>`${c} ${p.toFixed(1)}%`).join('、')}。`;
-  document.getElementById('banner').innerHTML=bHtml;
-
   const rk=(list,cls)=>list.length?list.map(x=>
     `<div data-n="${esc(x.it.name)}"><span>${esc(x.it.name)}</span><span class="pct ${cls}">${x.it.pct>0?'+':''}${x.it.pct.toFixed(1)}%</span></div>`).join('')
-    :'<b>今日暂无</b>';
+    :'<span style="color:var(--sub)">今日暂无</span>';
   document.getElementById('rankUp').innerHTML=rk([...ups].sort((a,b)=>b.it.pct-a.it.pct).slice(0,5),'up');
   document.getElementById('rankDown').innerHTML=rk([...downs].sort((a,b)=>a.it.pct-b.it.pct).slice(0,5),'down');
   document.querySelectorAll('.rk div').forEach(d=>d.onclick=()=>{
@@ -231,14 +216,13 @@ function render(){
   renderRows();markSel();drawChart();
 
   document.getElementById('stats').innerHTML=
-    `<span>全网累计访问 <b id="gv">…</b> 次</span>`+
     `<span>累计价格记录 <b>${(st.records||0).toLocaleString()}</b> 条</span>`+
-    `<span>累计运行 <b>${st.days||maxDays}</b> 天</span>`+
+    `<span>数据覆盖 <b>${st.days||maxDays}</b> 天</span>`+
     `<span>累计监控 <b>${st.items||ITEMS.length}</b> 款</span>`+
     `<span>你已访问 <b>${visits}</b> 次</span>`+
     `<span>收藏 <b>${FAVS.size}</b> 款</span>`;
   document.getElementById('foot').innerHTML=
-    `数据来源: 中关村在线参考报价 + 京东渠道价（每小时轮换刷新）· GitHub 服务器每小时自动更新 · 🥬 白菜价 = 记录期最低价<br>建议由规则自动生成，仅供参考 · 历史数据从上线之日起累计`;
+    `数据来源: ZOL 参考报价 + 京东渠道价 · 历史价格由 Internet Archive 网页快照回填 · GitHub 服务器每小时自动更新<br>🥬 白菜价=记录期最低价 · 建议与推荐由 Qwen2.5-3B 模型每日自动生成，仅供参考`;
 }
 
 const card=(n,t,c)=>`<div class="card"><div class="n" ${c?`style="color:${c}"`:''}>${n}</div><div class="t">${t}</div></div>`;
@@ -262,8 +246,7 @@ function visible(){
 function renderRows(){
   const list=visible();
   document.getElementById('count').textContent=`共 ${list.length} 款`;
-  const rows=document.getElementById('rows');
-  rows.innerHTML=list.map(({it,idx,s})=>{
+  document.getElementById('rows').innerHTML=list.map(({it,idx,s})=>{
     const a=advice(it,s);
     const col=CAT_COLORS[it.cat]||'#8a93a3';
     const gapTxt=s.gap==null?'-':(s.gap<=0.5?'<span class="gap-good">触底</span>':`+${s.gap.toFixed(1)}%`);
@@ -279,7 +262,7 @@ function renderRows(){
       <td class="adv-${a.c}">${a.t}</td>
     </tr>`;
   }).join('');
-  rows.querySelectorAll('tr').forEach(tr=>tr.onclick=e=>{
+  document.querySelectorAll('#rows tr').forEach(tr=>tr.onclick=e=>{
     if(e.target.dataset.fav!==undefined){
       const n=e.target.dataset.fav;
       FAVS.has(n)?FAVS.delete(n):FAVS.add(n);
@@ -310,12 +293,8 @@ function drawChart(){
   const s=S[it.name];
   document.getElementById('chart-title').textContent='— '+it.name;
   let hist;
-  if(rangeN===-1){
-    hist=(it.today||[]).map(x=>({d:'今日 '+x.h,p:x.p}));
-  }else{
-    hist=it.history||[];
-    if(rangeN>0)hist=hist.slice(-rangeN);
-  }
+  if(rangeN===-1){hist=(it.today||[]).map(x=>({d:'今日 '+x.h,p:x.p}));}
+  else{hist=it.history||[];if(rangeN>0)hist=hist.slice(-rangeN);}
   const svg=document.getElementById('chart');
   const W=880,H=300,L=64,R=16,T=18,B=34;
   if(!hist.length){svg.innerHTML='<text x="440" y="150" text-anchor="middle" font-size="13" fill="#8a93a3">暂无该时段数据</text>';return;}
@@ -372,7 +351,7 @@ document.getElementById('range').onclick=e=>{
 document.getElementById('search').oninput=e=>{fSearch=e.target.value.trim().toLowerCase();renderRows();};
 document.getElementById('catSel').onchange=e=>{fCat=e.target.value;renderRows();};
 document.getElementById('sortSel').onchange=e=>{fSort=e.target.value;renderRows();};
-document.getElementById('onlyFav').onclick=e=>{onlyFav=!onlyFav;e.target.classList.toggle('on');renderRows();};
+document.getElementById('onlyFav').onclick=e=>{onlyFav=!onlyFav;e.target.textContent=onlyFav?'★ 已只看收藏':'★ 只看收藏';renderRows();};
 document.getElementById('exportCsv').onclick=()=>{
   let csv='分类,商品,参考价,京东价,今日涨跌%,白菜价,URL\n';
   for(const it of ITEMS){
@@ -384,8 +363,20 @@ document.getElementById('exportCsv').onclick=()=>{
   a.download='pc-parts-prices.csv';a.click();
 };
 
-// 全网累计访问：每次打开发一条无CORS信标（计数服务代为累加，所有访客都算），
-// 展示数值由云端每小时从计数服务读回写进 visit.json 校准
+// AI 自动管理面板：焦点商品 + 当日点评 + 今日推荐
+function loadAiNote(){
+  fetch('ai_notes.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(n=>{
+    const el=document.getElementById('aiPanel');
+    if(!n||!(n.summary||n.picks||n.focus)){el.style.display='none';return;}
+    let html=`<span class="tag">AI 每日自动管理</span><span style="color:var(--sub);font-size:12px">${n.date} · ${n.model} 生成</span>`;
+    if(n.focus)html+=`<div class="focus">🎯 <b>${esc(n.focus.name)}</b><span style="color:var(--sub);font-size:13px">${esc(n.focus.blurb)}</span></div>`;
+    if(n.summary)html+=`<div class="sum">${esc(n.summary)}</div>`;
+    if(n.picks&&n.picks.length)html+=`<div class="picks">`+n.picks.map(p=>`<span>★ ${esc(p.name)} — ${esc(p.reason)}</span>`).join('')+`</div>`;
+    el.innerHTML=html;el.style.display='';
+  }).catch(()=>{});
+}
+
+// 全网累计访问：每次打开发一条无CORS信标累加，数值由云端每小时校准回写 visit.json
 let globalCount=null;
 function pingVisits(){
   const now=Date.now(),last=+localStorage.getItem('ppvb')||0;
@@ -393,26 +384,12 @@ function pingVisits(){
     localStorage.setItem('ppvb',now);
     try{fetch('https://abacus.jasoncameron.dev/hit/pc-price-tracker/sgbd0-visits',{mode:'no-cors',cache:'no-store'});}catch(e){}
   }
-  const apply=()=>{const el=document.getElementById('gv');if(el&&globalCount!=null)el.textContent=globalCount.toLocaleString();};
+  const apply=()=>{document.querySelectorAll('#gv').forEach(el=>{if(globalCount!=null)el.textContent=globalCount.toLocaleString();});};
   fetch('visit.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{
     if(d&&d.count)globalCount=Number(d.count);
     apply();
   }).catch(()=>{});
   setTimeout(apply,1500);
-}
-
-// AI 每日观察与推荐（云端 3B 模型自动生成）
-function loadAiNote(){
-  fetch('ai_notes.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(n=>{
-    const el=document.getElementById('aiPanel');
-    if(!n||!(n.summary||n.picks)){el.style.display='none';return;}
-    let html=`🤖 <b>AI 观察</b> <span class="meta">${n.date} · ${n.model} 每日自动生成并管理本页内容</span>`;
-    if(n.summary)html+=`<div style="margin-top:6px">${esc(n.summary)}</div>`;
-    if(n.picks&&n.picks.length){
-      html+=`<div style="margin-top:8px"><b>今日推荐</b> `+n.picks.map(p=>`<span style="margin-right:14px">★ ${esc(p.name)} — ${esc(p.reason)}</span>`).join('')+`</div>`;
-    }
-    el.innerHTML=html;el.style.display='';
-  }).catch(()=>{});
 }
 
 load();
