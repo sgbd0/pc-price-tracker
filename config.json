@@ -1,7 +1,7 @@
 {
   "model": {
     "enabled": true,
-    "file": "models/qwen2.5-3b-instruct-q4_k_m.gguf",
+    "file": "models/qwen2.5-1.5b-instruct-q4_k_m.gguf",
     "context_chars": 2000,
     "summary": true
   },
