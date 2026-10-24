@@ -68,6 +68,7 @@ footer{color:var(--sub);font-size:12px;margin-top:10px;line-height:1.8}
 
   <div class="cards" id="cards"></div>
   <div class="banner" id="banner">加载中…</div>
+  <div class="banner" id="aiPanel" style="display:none"></div>
 
   <div class="grid2">
     <div class="panel">
@@ -230,6 +231,7 @@ function render(){
   renderRows();markSel();drawChart();
 
   document.getElementById('stats').innerHTML=
+    `<span>全网累计访问 <b id="gv">…</b> 次</span>`+
     `<span>累计价格记录 <b>${(st.records||0).toLocaleString()}</b> 条</span>`+
     `<span>累计运行 <b>${st.days||maxDays}</b> 天</span>`+
     `<span>累计监控 <b>${st.items||ITEMS.length}</b> 款</span>`+
@@ -382,7 +384,40 @@ document.getElementById('exportCsv').onclick=()=>{
   a.download='pc-parts-prices.csv';a.click();
 };
 
+// 全网累计访问：每次打开发一条无CORS信标（计数服务代为累加，所有访客都算），
+// 展示数值由云端每小时从计数服务读回写进 visit.json 校准
+let globalCount=null;
+function pingVisits(){
+  const now=Date.now(),last=+localStorage.getItem('ppvb')||0;
+  if(now-last>600000){
+    localStorage.setItem('ppvb',now);
+    try{fetch('https://abacus.jasoncameron.dev/hit/pc-price-tracker/sgbd0-visits',{mode:'no-cors',cache:'no-store'});}catch(e){}
+  }
+  const apply=()=>{const el=document.getElementById('gv');if(el&&globalCount!=null)el.textContent=globalCount.toLocaleString();};
+  fetch('visit.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{
+    if(d&&d.count)globalCount=Number(d.count);
+    apply();
+  }).catch(()=>{});
+  setTimeout(apply,1500);
+}
+
+// AI 每日观察与推荐（云端 3B 模型自动生成）
+function loadAiNote(){
+  fetch('ai_notes.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(n=>{
+    const el=document.getElementById('aiPanel');
+    if(!n||!(n.summary||n.picks)){el.style.display='none';return;}
+    let html=`🤖 <b>AI 观察</b> <span class="meta">${n.date} · ${n.model} 每日自动生成并管理本页内容</span>`;
+    if(n.summary)html+=`<div style="margin-top:6px">${esc(n.summary)}</div>`;
+    if(n.picks&&n.picks.length){
+      html+=`<div style="margin-top:8px"><b>今日推荐</b> `+n.picks.map(p=>`<span style="margin-right:14px">★ ${esc(p.name)} — ${esc(p.reason)}</span>`).join('')+`</div>`;
+    }
+    el.innerHTML=html;el.style.display='';
+  }).catch(()=>{});
+}
+
 load();
+pingVisits();
+loadAiNote();
 setInterval(load,10*60*1000);
 </script>
 </body>
