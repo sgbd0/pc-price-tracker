@@ -34,6 +34,16 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:"Microsoft YaHei
 @media(max-width:720px){.ranks{grid-template-columns:1fr}}
 .rk{font-size:13px}.rk div{padding:4px 0;border-bottom:1px dashed #eef1f6;cursor:pointer;display:flex;justify-content:space-between;gap:8px}
 .rk div:hover{background:#f6f9ff}
+.star{cursor:pointer;color:#c9d2e0;font-size:16px;margin-right:4px;user-select:none;-webkit-user-select:none;display:inline-block;padding:6px;margin:-4px;touch-action:manipulation}
+.star.on{color:#f5a623}
+.adv-avoid{color:#b32323;font-weight:700}
+@media(max-width:720px){
+  table{min-width:860px}
+  .tblwrap{overflow:auto;-webkit-overflow-scrolling:touch}
+  th,td{padding:7px 6px;font-size:12.5px}
+  .topbar h1{font-size:17px}
+  .topbar .meta{font-size:11.5px}
+}
 .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
 input[type=search],select,button.btn{font-size:13px;padding:6px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--txt)}
 input[type=search]{min-width:160px;flex:1;max-width:280px}
@@ -48,8 +58,6 @@ th,td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:left;white-
 th{color:var(--sub);font-weight:600;font-size:11.5px;background:#f8fafd;position:sticky;top:0;z-index:2}
 td.name{white-space:normal;min-width:230px;max-width:350px}
 .cat-tag{display:inline-block;font-size:11px;color:#fff;border-radius:4px;padding:1px 6px;margin-right:6px;vertical-align:1px}
-.star{cursor:pointer;color:#c9d2e0;font-size:15px;margin-right:4px;user-select:none}
-.star.on{color:#f5a623}
 .jdtag{font-size:11px;color:#fff;background:var(--jd);border-radius:4px;padding:1px 5px;margin-right:4px}
 tbody tr{cursor:pointer}tbody tr:hover{background:#f6f9ff}tbody tr.sel{background:#eef3ff}
 .up{color:var(--up)}.down{color:var(--down)}.flat{color:var(--flat)}
@@ -71,6 +79,7 @@ footer{color:var(--sub);font-size:12px;margin:12px 0 0;line-height:1.8;text-alig
   <span class="meta" id="updated"></span>
   <span class="chip" id="daybadge"></span>
   <span class="chip">👁 全网 <b id="gv">…</b> 次</span>
+  <span class="chip">👥 全网 <b id="gu">…</b> 人</span>
 </div></div>
 
 <div class="body">
@@ -121,7 +130,7 @@ footer{color:var(--sub);font-size:12px;margin:12px 0 0;line-height:1.8;text-alig
     </div>
     <div class="tblwrap">
     <table>
-      <thead><tr><th>商品</th><th>参考价</th><th>京东价</th><th>涨跌</th><th>🥬 白菜价</th><th>距白菜价</th><th class="hidem">30天走势</th><th>建议</th></tr></thead>
+      <thead><tr><th>商品</th><th>参考价</th><th>渠道价</th><th>涨跌</th><th>🥬 白菜价</th><th>距白菜价</th><th class="hidem">30天走势</th><th>建议</th></tr></thead>
       <tbody id="rows"></tbody>
     </table>
     </div>
@@ -157,13 +166,22 @@ function stats(it){
   const min=Math.min(...v),max=Math.max(...v);
   const avg30=last30.length?last30.reduce((a,b)=>a+b,0)/last30.length:null;
   const pct30=(last30.length>1)?(v[v.length-1]-last30[0])/last30[0]*100:null;
-  const gap=(min>0&&v.length)?(it.price-min)/min*100:null;
-  return {min,max,avg30,pct30,gap,len:v.length};
+  // 白菜价 = 网上真实渠道价(京东/商家)与记录期最低价中的最低，bsrc 标来源
+  const chans=[[it.jd,'京'],[it.shop,'商']].filter(x=>x[0]!=null);
+  let bargain=min, bsrc='史';
+  for(const [p,tag] of chans){ if(p<bargain){bargain=p;bsrc=tag;} }
+  const webMin=chans.length?Math.min(...chans.map(x=>x[0])):null;
+  const gap=(bargain>0&&v.length)?(it.price-bargain)/bargain*100:null;
+  return {min,max,avg30,pct30,gap,len:v.length,bargain,bsrc,webMin};
 }
 
 function advice(it,s){
-  if(s.len<2)return {t:'首日记录中',c:'flat'};
-  if(it.price<=s.min*1.005)return {t:'🥬 白菜价，可入',c:'bargain'};
+  if(s.len<2)return {t:'数据积累中',c:'flat'};
+  if(it.price<=s.bargain*1.02)return {t:'🥬 白菜价，可入',c:'bargain'};
+  if(s.webMin!=null&&s.webMin<it.price*0.88)return {t:'⛔ 渠道价仅¥'+Math.round(s.webMin)+'，别按参考价入',c:'avoid'};
+  if(s.gap!=null&&s.gap>=12)return {t:'⛔ 高出白菜价'+s.gap.toFixed(0)+'%，特别不建议入',c:'avoid'};
+  if(s.max!=null&&it.price>=s.max*0.995&&s.gap!=null&&s.gap>=6)return {t:'⛔ 处于区间高位，不建议入',c:'avoid'};
+  if(s.pct30!=null&&s.pct30>=5)return {t:'⛔ 30天连涨'+s.pct30.toFixed(0)+'%，不建议追高',c:'avoid'};
   if(s.avg30&&it.price<=s.avg30*0.95)return {t:'低于30天均价'+((1-it.price/s.avg30)*100).toFixed(1)+'%，可考虑',c:'good'};
   if(s.pct30!=null&&s.pct30<=-5)return {t:'30天走低'+Math.abs(s.pct30).toFixed(0)+'%，可再等',c:'good'};
   if(s.avg30&&it.price>=s.avg30*1.05)return {t:'高于30天均价'+((it.price/s.avg30-1)*100).toFixed(1)+'%，观望',c:'bad'};
@@ -185,6 +203,7 @@ function render(){
 
   const withA=ITEMS.map(it=>({it,s:S[it.name],a:advice(it,S[it.name])}));
   const bargains=withA.filter(x=>x.a.c==='bargain');
+  const avoids=withA.filter(x=>x.a.c==='avoid');
   const ups=withA.filter(x=>x.it.pct!=null&&x.it.pct>0.05);
   const downs=withA.filter(x=>x.it.pct!=null&&x.it.pct<-0.05);
   const pcts=withA.filter(x=>x.it.pct!=null).map(x=>x.it.pct);
@@ -192,6 +211,7 @@ function render(){
   document.getElementById('cards').innerHTML=
     card(ITEMS.length,'监控配件',null,'all')+
     card(bargains.length,'🥬 已到白菜价','#0d7a3e','bargain')+
+    card(avoids.length,'⛔ 不建议入','#b32323','avoid')+
     card(ups.length,'今日上涨',UP,'up')+
     card(downs.length,'今日下跌',DOWN,'down')+
     card(pcts.length?avg.toFixed(2):'0.00','平均涨跌 %',avg<-0.05?DOWN:(avg>0.05?UP:FLAT));
@@ -233,12 +253,12 @@ function render(){
     `<span>你已访问 <b>${visits}</b> 次</span>`+
     `<span>收藏 <b>${FAVS.size}</b> 款</span>`;
   document.getElementById('foot').innerHTML=
-    `数据来源: ZOL 参考报价 + 京东渠道价（CPU/显卡/主板详情页提供；淘宝/拼多多需登录无法匿名抓取）· 每小时自动更新<br>30天历史含估算回填段（图表虚线），白菜价/趋势/建议基于全区间数据生成，实测数据逐日替换估算 · 推荐由 Qwen2.5-3B 自动生成`;
+    `数据来源: ZOL 参考报价 + 京东渠道价（京）+ ZOL商家最低价（商）· 每小时自动更新 · 🥬 白菜价=网上渠道(京东/商家)与记录期的最低价，京/商/史为来源<br>30天前历史含估算回填（图表虚线），实测逐日替换 · ⛔ 高位/连涨/远高于白菜价会明确标注"不建议入" · 建议仅供参考`;
 }
 
 const card=(n,t,c,f)=>`<div class="card ${f&&f!=='avg'?'clk':''}" ${f?`data-f="${f}"`:''}><div class="n" ${c?`style="color:${c}"`:''}>${n}</div><div class="t">${t}</div></div>`;
 
-const ADV_NAMES={bargain:'🥬 白菜价',up:'今日上涨',down:'今日下跌'};
+const ADV_NAMES={bargain:'🥬 白菜价',avoid:'⛔ 不建议入',up:'今日上涨',down:'今日下跌'};
 function syncAdv(){
   const chip=document.getElementById('fadvChip');
   document.querySelectorAll('.card.clk').forEach(c=>c.classList.toggle('act',c.dataset.f===fAdv));
@@ -251,7 +271,8 @@ function visible(){
   if(fCat!=='全部')list=list.filter(x=>x.it.cat===fCat);
   if(fSearch)list=list.filter(x=>x.it.name.toLowerCase().includes(fSearch));
   if(onlyFav)list=list.filter(x=>FAVS.has(x.it.name));
-  if(fAdv==='bargain')list=list.filter(x=>x.s.len>=2&&x.it.price<=x.s.min*1.005);
+  if(fAdv==='bargain')list=list.filter(x=>x.s.len>=2&&x.it.price<=x.s.bargain*1.02);
+  if(fAdv==='avoid')list=list.filter(x=>['avoid'].includes(advice(x.it,x.s).c));
   if(fAdv==='up')list=list.filter(x=>x.it.pct!=null&&x.it.pct>0.05);
   if(fAdv==='down')list=list.filter(x=>x.it.pct!=null&&x.it.pct<-0.05);
   const sorters={
@@ -280,23 +301,30 @@ function renderRows(){
     return `<tr data-i="${idx}">
       <td class="name"><span class="star ${fav?'on':''}" data-fav="${esc(it.name)}">${fav?'★':'☆'}</span><span class="cat-tag" style="background:${col}">${it.cat}</span><a href="${it.url}" target="_blank" onclick="event.stopPropagation()">${esc(it.name)}</a></td>
       <td class="price">${fmt(it.price)}</td>
-      <td>${it.jd!=null?`<span class="jdtag">京</span>${fmt(it.jd)}`:'—'}</td>
+      <td>${it.jd!=null?`<span class="jdtag">京</span>${fmt(it.jd)}`:(it.shop!=null?`<span class="jdtag" style="background:#3c8bbf">商</span>${fmt(it.shop)}`:'—')}</td>
       <td>${pctSpan(it.pct)}</td>
-      <td class="${a.c==='bargain'?'bargain':''}">${s.min!=null?fmt(s.min):'—'}</td>
+      <td class="${a.c==='bargain'?'bargain':''}">${s.bargain!=null?fmt(s.bargain):'—'}<span style="font-size:10px;color:var(--sub);margin-left:3px">${s.bsrc}</span></td>
       <td>${gapTxt}</td>
       <td class="hidem">${spark(it.history)}</td>
       <td class="adv-${a.c}">${a.t}</td>
     </tr>`;
   }).join('');
-  document.querySelectorAll('#rows tr').forEach(tr=>tr.onclick=e=>{
-    if(e.target.dataset.fav!==undefined){
-      const n=e.target.dataset.fav;
-      FAVS.has(n)?FAVS.delete(n):FAVS.add(n);
-      saveFavs();renderRows();return;
-    }
-    sel=+tr.dataset.i;pick.value=sel;drawChart();markSel();
-  });
+  document.querySelectorAll('#rows tr').forEach(()=>{});
 }
+// 行内点击统一委托：优先星标收藏（放大命中区，兼容触屏），否则选中走势图
+document.getElementById('rows').addEventListener('click',e=>{
+  const star=e.target.closest('[data-fav]');
+  if(star){
+    e.preventDefault();e.stopPropagation();
+    const n=star.dataset.fav;
+    FAVS.has(n)?FAVS.delete(n):FAVS.add(n);
+    saveFavs();renderRows();return;
+  }
+  const tr=e.target.closest('tr');
+  if(tr&&tr.dataset.i!==undefined){
+    sel=+tr.dataset.i;pick.value=sel;drawChart();markSel();
+  }
+});
 
 function markSel(){document.querySelectorAll('#rows tr').forEach(tr=>tr.classList.toggle('sel',+tr.dataset.i===sel));}
 
@@ -417,17 +445,25 @@ function loadAiNote(){
   }).catch(()=>{});
 }
 
-// 全网累计访问：每次打开发一条无CORS信标累加，数值由云端每小时校准回写 visit.json
-let globalCount=null;
+// 全网累计访问/使用人数：访问信标10分钟节流；人数信标每个浏览器终身一次；数值由云端每小时校准
+let globalCount=null,globalUsers=null;
 function pingVisits(){
   const now=Date.now(),last=+localStorage.getItem('ppvb')||0;
   if(now-last>600000){
     localStorage.setItem('ppvb',now);
     try{fetch('https://abacus.jasoncameron.dev/hit/pc-price-tracker/sgbd0-visits',{mode:'no-cors',cache:'no-store'});}catch(e){}
   }
-  const apply=()=>{document.querySelectorAll('#gv').forEach(el=>{if(globalCount!=null)el.textContent=globalCount.toLocaleString();});};
+  if(!localStorage.getItem('ppuv')){
+    localStorage.setItem('ppuv','1');
+    try{fetch('https://abacus.jasoncameron.dev/hit/pc-price-tracker/sgbd0-users',{mode:'no-cors',cache:'no-store'});}catch(e){}
+  }
+  const apply=()=>{
+    document.querySelectorAll('#gv').forEach(el=>{if(globalCount!=null)el.textContent=globalCount.toLocaleString();});
+    document.querySelectorAll('#gu').forEach(el=>{if(globalUsers!=null)el.textContent=globalUsers.toLocaleString();});
+  };
   fetch('visit.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{
     if(d&&d.count)globalCount=Number(d.count);
+    if(d&&d.users!=null)globalUsers=Number(d.users);
     apply();
   }).catch(()=>{});
   setTimeout(apply,1500);
