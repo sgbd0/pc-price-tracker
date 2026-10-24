@@ -54,6 +54,9 @@ def main(args=None):
     tracker.save_config(cfg)
     port = getattr(args, "port", None) or web_cfg.get("port", 8787)
     bind = getattr(args, "bind", None) or web_cfg.get("bind", "127.0.0.1")
+    # 禁止端口复用叠加：旧实例还活着时新实例直接报错退出，避免多进程串数据
+    ThreadingHTTPServer.allow_reuse_address = False
+    ThreadingHTTPServer.daemon_threads = True
     httpd = ThreadingHTTPServer((bind, port), DashboardHandler)
     print(f"看板已启动: http://{'127.0.0.1' if bind == '0.0.0.0' else bind}:{port}", flush=True)
     httpd.serve_forever()
