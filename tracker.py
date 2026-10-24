@@ -820,6 +820,10 @@ def cmd_backfill(args):
     n_est = sum(1 for r in rows_out if r["method"] == "估算回填")
     log(f"回填完成: 快照真实价 {len(backfill)} 条 + 估算 {len(est_rows)} 条(标灰展示,不计入统计)，"
         f"库内共 {len(rows_out)} 条，覆盖 {dates[0]} ~ {dates[-1]} 共 {len(dates)} 天")
+    try:
+        cmd_web_export(args)
+    except Exception as e:
+        log(f"回填后网页数据导出失败: {e}")
     return 0
 
 
