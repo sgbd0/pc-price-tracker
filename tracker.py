@@ -499,7 +499,7 @@ def build_web_data():
             "days": len(h),
             "history": [{"d": d, "p": p} for d, p in recent],
         })
-    return {"updated": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
+    return {"updated": dt.datetime.now(dt.timezone(dt.timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
             "public_url": public_url(), "items": items}
 
 
