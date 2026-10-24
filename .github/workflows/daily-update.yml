@@ -1,17 +1,17 @@
-name: daily-price-update
+name: price-update
 
 on:
   schedule:
-    - cron: '0 1 * * *'   # UTC 01:00 = 北京时间每天 09:00
-  workflow_dispatch:        # 支持在网页上手动触发
+    - cron: '0 * * * *'   # 每小时整点自动更新（UTC）
+  workflow_dispatch:        # 支持网页手动触发
   push:
-    branches: [main]        # 首次推送后立即跑一次，方便验证
+    branches: [main]        # 推送后立即跑一次
 
 permissions:
   contents: write
 
 concurrency:
-  group: daily-price-update
+  group: price-update
   cancel-in-progress: true
 
 jobs:
@@ -32,16 +32,19 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: 安装小模型运行库（失败则退回纯规则模式）
+      # 每天北京时间 09:00（UTC 01:00）那一轮加载 3B 模型写当日摘要；
+      # 其余整点纯规则运行，几十秒完成，节省免费额度。
+      - name: 安装模型运行库
+        if: github.event_name != 'schedule' || github.event.schedule == '0 1 * * *'
         run: |
           pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu \
-            || pip install llama-cpp-python \
-            || echo "::warning::llama-cpp 安装失败，本次改用纯规则模式"
+            || pip install llama-cpp-python || true
 
-      - name: 下载小模型（约400MB，仅本次运行期间存在）
+      - name: 下载模型 Qwen2.5-3B（约2GB，仅每日一轮）
+        if: github.event_name != 'schedule' || github.event.schedule == '0 1 * * *'
         run: python tracker.py model-setup || true
 
-      - name: 更新全部商品价格并生成网页数据
+      - name: 更新价格（ZOL参考报价 + 京东渠道轮换）
         run: python tracker.py run
 
       - name: 把最新价格历史提交回仓库
@@ -52,7 +55,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "价格无变化，跳过提交"
           else
-            git commit -m "auto: update prices $(date +%F)"
+            git commit -m "auto: update prices $(date -u +'%F %H:%M')"
             git push
           fi
 
