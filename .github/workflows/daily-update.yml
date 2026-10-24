@@ -51,6 +51,10 @@ jobs:
         if: github.event_name != 'schedule' || github.event.schedule == '0 1 * * *'
         run: python tracker.py backfill || true
 
+      - name: 京东渠道全量补扫（每日/推送时）
+        if: github.event_name != 'schedule' || github.event.schedule == '0 1 * * *'
+        run: python tracker.py jd-sweep || true
+
       - name: 读全网访问计数写入 visit.json
         run: |
           V=$(curl -sf -m 20 "https://abacus.jasoncameron.dev/get/pc-price-tracker/sgbd0-visits" \
