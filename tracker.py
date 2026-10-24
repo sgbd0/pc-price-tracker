@@ -600,6 +600,84 @@ def fetch_item_price(item, model):
     return {"name": item["name"], "url": url, "ok": True, "price": price, "method": method}
 
 
+def _clip_sentence(text):
+    text = (text or "").strip()
+    if text and not re.search(r"[。！？…」']$", text):
+        cut = max(text.rfind("。"), text.rfind("！"), text.rfind("？"))
+        text = text[:cut + 1] if cut >= 8 else ""
+    return text
+
+
+def write_ai_note(model, tracked):
+    """AI 自动管理网页：每天写一份「AI 观察 + 今日推荐」到 web/ai_notes.json 供网页展示。"""
+    if not model.available():
+        return
+    note_path = os.path.join(BASE, "web", "ai_notes.json")
+    today = dt.date.today().isoformat()
+    try:
+        old = json.load(open(note_path, encoding="utf-8"))
+    except Exception:
+        old = {}
+    if old.get("date") == today and old.get("picks"):
+        return
+
+    sys_p = "你是装机价格助手，用简体中文回答，格式必须严格遵守。"
+
+    # 事实1：涨跌榜
+    ranked = sorted([r for r in tracked if r["pct"] is not None], key=lambda r: r["pct"])
+    facts = []
+    for r in ranked[-3:][::-1]:
+        facts.append(f"{r['name']} 涨{r['pct']:.1f}%到{r['price']:,.0f}元")
+    for r in ranked[:3]:
+        facts.append(f"{r['name']} 跌{abs(r['pct']):.1f}%到{r['price']:,.0f}元")
+
+    # 事实2：接近历史最低的候选（白菜价候选）
+    cands = []
+    for r in tracked:
+        h = r.get("history") or []
+        if len(h) < 2:
+            continue
+        low = min(x[1] for x in h)
+        if r["price"] <= low * 1.01:
+            cands.append(f"{r['name']}：现价{r['price']:,.0f}元≈历史低{low:,.0f}元")
+    cands = cands[:10]
+
+    # 点评
+    ai_summary = ""
+    if facts:
+        usr = ("今日配件价格变化：" + "；".join(facts) +
+               "\n用不超过60字点评今天 DIY 配件行情，说清什么在涨什么在跌。")
+        ai_summary = _clip_sentence(model.chat(sys_p, usr, max_tokens=140, temperature=0.4))
+
+    # 推荐：从白菜价候选里挑
+    picks = []
+    if cands:
+        usr2 = ("以下配件现价已接近历史最低价：\n" + "\n".join(cands) +
+                "\n从中挑选最多3个最值得现在买的，严格按如下格式每行一条输出，"
+                "格式为「名称：理由(15字内)」，不要输出其他任何内容。")
+        raw = model.chat(sys_p, usr2, max_tokens=220, temperature=0.3)
+        names = {r["name"] for r in tracked}
+        for line in raw.splitlines():
+            line = line.strip().lstrip("0123456789.*-、 ").strip()
+            nm, sep, reason = (line.partition("：") if "：" in line else line.partition(":"))
+            nm, reason = nm.strip(), reason.strip()
+            if not sep or not reason:
+                continue
+            match = next((n for n in names if nm and (nm in n or n in nm)), None)
+            if match:
+                picks.append({"name": match, "reason": reason[:30]})
+        picks = picks[:3]
+
+    if not ai_summary and not picks:
+        return
+    note = {"date": today, "model": "Qwen2.5-3B", "summary": ai_summary, "picks": picks,
+            "generated": dt.datetime.now(dt.timezone(dt.timedelta(hours=8))).strftime("%Y-%m-%d %H:%M")}
+    os.makedirs(os.path.dirname(note_path), exist_ok=True)
+    with open(note_path, "w", encoding="utf-8") as f:
+        json.dump(note, f, ensure_ascii=False, indent=1)
+    log(f"AI 观察已写入 web/ai_notes.json（点评{'√' if ai_summary else '×'} 推荐{len(picks)}条）")
+
+
 def cmd_run(args):
     cfg = load_config()
     os.makedirs(LOGS_DIR, exist_ok=True)
@@ -710,6 +788,15 @@ def cmd_run(args):
             summary = f"今日 {len(tracked)} 款配件价格总体平稳，无明显涨跌。"
         if summary:
             log(f"摘要: {summary}")
+
+    # 5) AI 自动管理网页：写每日观察与推荐（仅带模型的运行轮次生效）
+    try:
+        if model is None:
+            model = ModelEngine(cfg["model"])
+            model.load()
+        write_ai_note(model, tracked)
+    except Exception as e:
+        log(f"AI 观察生成失败: {e}")
 
     with open(LATEST_JSON, "w", encoding="utf-8") as f:
         json.dump({"updated": dt.datetime.now().isoformat(timespec="seconds"),
