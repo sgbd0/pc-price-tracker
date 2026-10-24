@@ -654,7 +654,7 @@ def write_ai_note(model, tracked):
     if cands:
         usr2 = ("以下配件现价已接近历史最低价：\n" + "\n".join(cands) +
                 "\n从中挑选最多3个最值得现在买的，严格按如下格式每行一条输出，"
-                "格式为「名称：理由(15字内)」，不要输出其他任何内容。")
+                "格式为「名称：理由(15字内，理由里必须提到具体价格)」，不要输出其他任何内容。")
         raw = model.chat(sys_p, usr2, max_tokens=220, temperature=0.3)
         names = {r["name"] for r in tracked}
         for line in raw.splitlines():
