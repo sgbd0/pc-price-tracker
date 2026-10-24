@@ -5,34 +5,56 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>电脑配件价格看板</title>
 <style>
-:root{--up:#d9412f;--down:#1f9d55;--flat:#8a93a3;--bg:#f4f6fa;--card:#fff;--line:#e8ecf2;--txt:#1c2330;--sub:#68738a}
+:root{--up:#d9412f;--down:#1f9d55;--flat:#8a93a3;--bg:#f4f6fa;--card:#fff;--line:#e8ecf2;--txt:#1c2330;--sub:#68738a;--acc:#2456c4;--jd:#e1251b}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:"Microsoft YaHei",system-ui,-apple-system,sans-serif}
-.wrap{max-width:980px;margin:0 auto;padding:20px 16px 40px}
-header{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:14px}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:14px}
 h1{font-size:21px;margin:0}
 .meta{color:var(--sub);font-size:13px}
-.pub{font-size:13px;background:#eef4ff;border:1px solid #d5e3ff;border-radius:999px;padding:3px 12px;color:#2456c4;text-decoration:none;word-break:break-all}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.badge{font-size:12px;border-radius:999px;padding:3px 10px;background:#eef6ff;color:#1a63c9;border:1px solid #d5e6ff}
+.pub{font-size:12.5px;background:#eef4ff;border:1px solid #d5e3ff;border-radius:999px;padding:3px 12px;color:var(--acc);text-decoration:none}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:10px;margin-bottom:12px}
 .card{background:var(--card);border-radius:12px;padding:12px 16px;box-shadow:0 1px 3px rgba(16,24,40,.06)}
-.card .n{font-size:24px;font-weight:700}.card .t{color:var(--sub);font-size:12px;margin-top:2px}
-.panel{background:var(--card);border-radius:12px;box-shadow:0 1px 3px rgba(16,24,40,.06);padding:14px 16px;margin-bottom:14px}
+.card .n{font-size:23px;font-weight:700}.card .t{color:var(--sub);font-size:12px;margin-top:2px}
+.banner{background:linear-gradient(90deg,#f0f9f1,#eef4ff);border:1px solid #d8ead9;border-radius:12px;padding:12px 16px;font-size:13.5px;line-height:1.7;margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}}
+.panel{background:var(--card);border-radius:12px;box-shadow:0 1px 3px rgba(16,24,40,.06);padding:14px 16px;margin-bottom:12px}
 .panel h2{font-size:15px;margin:0 0 10px}
-.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
-select,.range button{font-size:13px;padding:5px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--txt)}
-.range button.on{background:#2456c4;color:#fff;border-color:#2456c4}
+.ranks{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ranks .rk{font-size:13px}
+.rk div{padding:4px 0;border-bottom:1px dashed #eef1f6;cursor:pointer;display:flex;justify-content:space-between;gap:8px}
+.rk div:hover{background:#f6f9ff}
+.rk b{font-size:12px;color:var(--sub);font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+input[type=search],select,button.btn{font-size:13px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--txt)}
+input[type=search]{min-width:160px;flex:1;max-width:280px}
+button.btn{cursor:pointer}button.btn:hover{border-color:var(--acc);color:var(--acc)}
+.range button{font-size:13px;padding:5px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer}
+.range button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 #chart-box{position:relative}
 #tooltip{position:absolute;pointer-events:none;background:#101828;color:#fff;font-size:12px;padding:6px 10px;border-radius:8px;display:none;white-space:nowrap;z-index:5}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
-th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
-th{color:var(--sub);font-weight:600;font-size:12.5px;background:#f8fafc}
-td.name{white-space:normal;min-width:180px}
-tbody tr{cursor:pointer}tbody tr:hover{background:#f6f9ff}
-tbody tr.sel{background:#eef4ff}
-.pct{font-weight:600}.up{color:var(--up)}.down{color:var(--down)}.flat{color:var(--flat)}
-.price{font-weight:700}
-a{color:#2456c4;text-decoration:none}a:hover{text-decoration:underline}
-footer{color:var(--sub);font-size:12px;margin-top:10px;line-height:1.7}
-@media(max-width:640px){th,td{padding:7px 6px}.lowcol,.highcol{display:none}}
+.tblwrap{max-height:640px;overflow:auto;border-radius:8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{color:var(--sub);font-weight:600;font-size:12px;background:#f8fafc;position:sticky;top:0;z-index:2}
+td.name{white-space:normal;min-width:230px;max-width:350px}
+.cat-tag{display:inline-block;font-size:11px;color:#fff;border-radius:4px;padding:1px 6px;margin-right:6px;vertical-align:1px}
+.star{cursor:pointer;color:#c9d2e0;font-size:15px;margin-right:4px;user-select:none}
+.star.on{color:#f5a623}
+.jdtag{font-size:11px;color:#fff;background:var(--jd);border-radius:4px;padding:1px 5px;margin-right:4px}
+tbody tr{cursor:pointer}tbody tr:hover{background:#f6f9ff}tbody tr.sel{background:#eef4ff}
+.up{color:var(--up)}.down{color:var(--down)}.flat{color:var(--flat)}
+.price{font-weight:700}.bargain{color:#0d7a3e;font-weight:700}
+.pct{font-weight:600}
+.adv-bargain{color:#0d7a3e;font-weight:700}.adv-good{color:#1f9d55}.adv-bad{color:#d9412f}.adv-flat{color:var(--flat)}
+.gap-good{color:#0d7a3e;font-weight:600}
+a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
+.count{color:var(--sub);font-size:12px;margin-left:auto}
+.statline{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--sub);font-size:12.5px;margin-top:10px}
+.statline b{color:var(--txt)}
+footer{color:var(--sub);font-size:12px;margin-top:10px;line-height:1.8}
+@media(max-width:720px){.hidem{display:none}td.name{min-width:170px}}
 </style>
 </head>
 <body>
@@ -40,33 +62,62 @@ footer{color:var(--sub);font-size:12px;margin-top:10px;line-height:1.7}
   <header>
     <h1>🖥️ 电脑配件价格看板</h1>
     <span class="meta" id="updated"></span>
+    <span class="badge" id="daybadge"></span>
     <a class="pub" id="pub" style="display:none" target="_blank"></a>
   </header>
 
   <div class="cards" id="cards"></div>
+  <div class="banner" id="banner">加载中…</div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h2>📈 今日涨幅榜 TOP5</h2><div class="rk" id="rankUp"></div>
+    </div>
+    <div class="panel">
+      <h2>📉 今日跌幅榜 TOP5</h2><div class="rk" id="rankDown"></div>
+    </div>
+  </div>
 
   <div class="panel">
-    <h2>价格走势</h2>
+    <h2>价格走势 <span class="meta" id="chart-title"></span></h2>
     <div class="controls">
       <select id="pick"></select>
       <span class="range" id="range">
+        <button data-n="-1">今日分时</button>
         <button data-n="30" class="on">近30天</button>
         <button data-n="90">近90天</button>
         <button data-n="0">全部</button>
       </span>
     </div>
     <div id="chart-box">
-      <svg id="chart" viewBox="0 0 860 300" width="100%"></svg>
+      <svg id="chart" viewBox="0 0 880 300" width="100%"></svg>
       <div id="tooltip"></div>
     </div>
   </div>
 
   <div class="panel">
-    <h2>全部商品</h2>
+    <div class="controls">
+      <input type="search" id="search" placeholder="搜索配件名称…">
+      <select id="catSel"></select>
+      <select id="sortSel">
+        <option value="cat">排序：分类</option>
+        <option value="pct">排序：今日涨跌</option>
+        <option value="gap">排序：距白菜价</option>
+        <option value="price">排序：价格</option>
+        <option value="pct30">排序：30天走势</option>
+        <option value="fav">排序：收藏优先</option>
+      </select>
+      <button class="btn" id="onlyFav">★ 只看收藏</button>
+      <button class="btn" id="exportCsv">⬇ 导出CSV</button>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="tblwrap">
     <table>
-      <thead><tr><th>分类</th><th>商品</th><th>今日价</th><th>上次价</th><th>涨跌</th><th class="lowcol">记录期最低</th><th>走势</th></tr></thead>
+      <thead><tr><th>商品</th><th>参考价</th><th>京东价</th><th>涨跌</th><th>🥬 白菜价</th><th>距白菜价</th><th class="hidem">30天走势</th><th>建议</th></tr></thead>
       <tbody id="rows"></tbody>
     </table>
+    </div>
+    <div class="statline" id="stats"></div>
   </div>
 
   <footer id="foot"></footer>
@@ -74,147 +125,265 @@ footer{color:var(--sub);font-size:12px;margin-top:10px;line-height:1.7}
 
 <script>
 const UP='#d9412f', DOWN='#1f9d55', FLAT='#8a93a3';
-let DATA=null, ITEMS=[], sel=0, rangeN=30, hoverX=-1;
+const CAT_COLORS={'CPU':'#5b6ee1','主板':'#8e5bd1','内存':'#d1843b','显卡':'#3ba7a0','固态硬盘':'#4f9d5d','机械硬盘':'#7a8b3c','电源':'#c26a1f','机箱':'#b05a6e','散热器':'#3c8bbf','显示器':'#c95570','配件':'#8a93a3'};
+let DATA=null, ITEMS=[], S={}, sel=0, rangeN=30, hoverX=-1, fCat='全部', fSearch='', fSort='cat', onlyFav=false;
+let FAVS=(()=>{try{return new Set(JSON.parse(localStorage.getItem('ppf')||'[]'))}catch(e){return new Set()}})();
+let visits=(+localStorage.getItem('ppv')||0)+1; localStorage.setItem('ppv',visits);
 
-const fmt = n => n==null ? '-' : '¥'+n.toLocaleString('zh-CN', {maximumFractionDigits:0});
-const pctSpan = p => {
-  if (p==null) return '<span class="flat">新增</span>';
-  if (p>0.05)  return `<span class="pct up">▲ +${p.toFixed(1)}%</span>`;
-  if (p<-0.05) return `<span class="pct down">▼ ${p.toFixed(1)}%</span>`;
-  return '<span class="flat">— 持平</span>';
-};
+const fmt=n=>n==null?'-':'¥'+n.toLocaleString('zh-CN',{maximumFractionDigits:0});
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const saveFavs=()=>localStorage.setItem('ppf',JSON.stringify([...FAVS]));
 
 async function load(){
   let r;
-  try { r = await fetch('/api/data', {cache:'no-store'}); if(!r.ok) throw 0; }
-  catch(e){ r = await fetch('data.json', {cache:'no-store'}); }
-  DATA = await r.json();
-  ITEMS = DATA.items.filter(it=>it.price!=null);
+  try{r=await fetch('/api/data',{cache:'no-store'});if(!r.ok)throw 0;}
+  catch(e){r=await fetch('data.json',{cache:'no-store'});}
+  DATA=await r.json();
+  ITEMS=DATA.items.filter(it=>it.price!=null);
+  S={};for(const it of ITEMS)S[it.name]=stats(it);
   render();
 }
 
+function stats(it){
+  const v=(it.history||[]).map(h=>h.p);
+  const last30=v.slice(-30);
+  const min=Math.min(...v),max=Math.max(...v);
+  const avg30=last30.length?last30.reduce((a,b)=>a+b,0)/last30.length:null;
+  const pct30=(last30.length>1)?(v[v.length-1]-last30[0])/last30[0]*100:null;
+  const gap=(min>0)?(it.price-min)/min*100:null;
+  return {min,max,avg30,pct30,gap,len:v.length};
+}
+
+function advice(it,s){
+  if(s.len<2)return {t:'首日记录中',c:'flat'};
+  if(it.price<=s.min*1.005)return {t:'🥬 白菜价，可入',c:'bargain'};
+  if(s.avg30&&it.price<=s.avg30*0.95)return {t:'低于30天均价'+((1-it.price/s.avg30)*100).toFixed(1)+'%，可考虑',c:'good'};
+  if(s.pct30!=null&&s.pct30<=-5)return {t:'30天走低'+Math.abs(s.pct30).toFixed(0)+'%，可再等',c:'good'};
+  if(s.avg30&&it.price>=s.avg30*1.05)return {t:'高于30天均价'+((it.price/s.avg30-1)*100).toFixed(1)+'%，观望',c:'bad'};
+  return {t:'价格平稳',c:'flat'};
+}
+
+const pctSpan=p=>{
+  if(p==null)return '<span class="flat">新增</span>';
+  if(p>0.05)return `<span class="pct up">▲ +${p.toFixed(1)}%</span>`;
+  if(p<-0.05)return `<span class="pct down">▼ ${p.toFixed(1)}%</span>`;
+  return '<span class="flat">—</span>';
+};
+
 function render(){
-  document.getElementById('updated').textContent = '更新于 ' + (DATA.updated||'-');
-  const pub = document.getElementById('pub');
-  if (DATA.public_url){ pub.style.display=''; pub.href=DATA.public_url; pub.textContent='🌐 公开地址: '+DATA.public_url; }
+  document.getElementById('updated').textContent='更新于 '+(DATA.updated||'')+'（每小时自动刷新）';
+  const st=DATA.stats||{};
+  const maxDays=ITEMS.length?Math.max(...ITEMS.map(i=>i.days||1)):1;
+  document.getElementById('daybadge').textContent='记录第 '+maxDays+' 天';
+  const pub=document.getElementById('pub');
+  if(DATA.public_url){pub.style.display='';pub.href=DATA.public_url;pub.textContent='🌐 '+DATA.public_url;}
 
-  const ups   = ITEMS.filter(i=>i.pct!=null && i.pct>0.05).length;
-  const downs = ITEMS.filter(i=>i.pct!=null && i.pct<-0.05).length;
-  const flats = ITEMS.filter(i=>i.pct!=null && Math.abs(i.pct)<=0.05).length;
-  document.getElementById('cards').innerHTML =
-    card(ITEMS.length,'监控商品')+card(ups,'今日上涨',UP)+card(downs,'今日下跌',DOWN)+card(flats,'今日持平');
+  const withA=ITEMS.map(it=>({it,s:S[it.name],a:advice(it,S[it.name])}));
+  const bargains=withA.filter(x=>x.a.c==='bargain');
+  const ups=withA.filter(x=>x.it.pct!=null&&x.it.pct>0.05);
+  const downs=withA.filter(x=>x.it.pct!=null&&x.it.pct<-0.05);
+  const pcts=withA.filter(x=>x.it.pct!=null).map(x=>x.it.pct);
+  const avg=pcts.length?pcts.reduce((a,b)=>a+b,0)/pcts.length:0;
+  document.getElementById('cards').innerHTML=
+    card(ITEMS.length,'监控配件')+
+    card(bargains.length,'🥬 已到白菜价','#0d7a3e')+
+    card(ups.length,'今日上涨',UP)+
+    card(downs.length,'今日下跌',DOWN)+
+    card(pcts.length?avg.toFixed(2):'0.00','平均涨跌 %',avg<-0.05?DOWN:(avg>0.05?UP:FLAT));
 
-  const pick = document.getElementById('pick');
-  pick.innerHTML = ITEMS.map((it,i)=>`<option value="${i}">${it.name}</option>`).join('');
-  pick.value = Math.min(sel, Math.max(ITEMS.length-1,0));
-  pick.onchange = e => { sel=+e.target.value; drawChart(); markSel(); };
+  const catTrend={};
+  for(const x of withA){if(x.s.pct30!=null){(catTrend[x.it.cat]=catTrend[x.it.cat]||[]).push(x.s.pct30);}}
+  const catAvg=Object.entries(catTrend).map(([c,a])=>[c,a.reduce((p,q)=>p+q,0)/a.length]).sort((a,b)=>a[1]-b[1]);
+  let bHtml=`💡 <b>购买建议</b>（规则生成，仅供参考）：`;
+  if(bargains.length){
+    const names=bargains.slice(0,4).map(x=>x.it.name).join('、')+(bargains.length>4?' 等':'');
+    bHtml+=`当前 <b>${bargains.length} 款配件已到白菜价</b>（${names}），值得关注。`;
+  }else if(maxDays<2){
+    bHtml+=`今天刚开始记录 ${ITEMS.length} 款配件的首日价格，<b>涨跌、30天趋势和白菜价判定将从第 2 天起逐日完善</b>（数据每小时更新），建议收藏本页。`;
+  }else{
+    bHtml+=`暂无配件处于白菜价。`;
+  }
+  if(catAvg.length&&maxDays>=2)bHtml+=` 板块30天动向：${catAvg.slice(0,2).map(([c,p])=>`${c} ${p.toFixed(1)}%`).join('、')}。`;
+  document.getElementById('banner').innerHTML=bHtml;
 
-  const rows = document.getElementById('rows');
-  rows.innerHTML = DATA.items.map((it,i)=>{
-    const cls = ITEMS[i]===it ? '' : '';
-    return `<tr data-i="${i}">
-      <td>${it.cat||'配件'}</td>
-      <td class="name"><a href="${it.url}" target="_blank" onclick="event.stopPropagation()">${esc(it.name)}</a></td>
+  const rk=(list,cls)=>list.length?list.map(x=>
+    `<div data-n="${esc(x.it.name)}"><span>${esc(x.it.name)}</span><span class="pct ${cls}">${x.it.pct>0?'+':''}${x.it.pct.toFixed(1)}%</span></div>`).join('')
+    :'<b>今日暂无</b>';
+  document.getElementById('rankUp').innerHTML=rk([...ups].sort((a,b)=>b.it.pct-a.it.pct).slice(0,5),'up');
+  document.getElementById('rankDown').innerHTML=rk([...downs].sort((a,b)=>a.it.pct-b.it.pct).slice(0,5),'down');
+  document.querySelectorAll('.rk div').forEach(d=>d.onclick=()=>{
+    const i=ITEMS.findIndex(x=>x.name===d.dataset.n);
+    if(i>=0){sel=i;pick.value=i;drawChart();markSel();window.scrollTo({top:0,behavior:'smooth'});}
+  });
+
+  const cats=['全部',...new Set(DATA.items.map(it=>it.cat||'配件'))];
+  const catCount={};for(const it of DATA.items)catCount[it.cat||'配件']=(catCount[it.cat||'配件']||0)+1;
+  const catSel=document.getElementById('catSel');
+  catSel.innerHTML=cats.map(c=>`<option value="${c}">${c==='全部'?'全部分类':c+' ('+(catCount[c]||0)+')'}</option>`).join('');
+  catSel.value=cats.includes(fCat)?fCat:'全部';
+
+  const pick=document.getElementById('pick');
+  pick.innerHTML=ITEMS.map((it,i)=>`<option value="${i}">${it.cat} · ${it.name}</option>`).join('');
+  pick.value=Math.min(sel,Math.max(ITEMS.length-1,0));
+  pick.onchange=e=>{sel=+e.target.value;drawChart();markSel();};
+
+  renderRows();markSel();drawChart();
+
+  document.getElementById('stats').innerHTML=
+    `<span>累计价格记录 <b>${(st.records||0).toLocaleString()}</b> 条</span>`+
+    `<span>累计运行 <b>${st.days||maxDays}</b> 天</span>`+
+    `<span>累计监控 <b>${st.items||ITEMS.length}</b> 款</span>`+
+    `<span>你已访问 <b>${visits}</b> 次</span>`+
+    `<span>收藏 <b>${FAVS.size}</b> 款</span>`;
+  document.getElementById('foot').innerHTML=
+    `数据来源: 中关村在线参考报价 + 京东渠道价（每小时轮换刷新）· GitHub 服务器每小时自动更新 · 🥬 白菜价 = 记录期最低价<br>建议由规则自动生成，仅供参考 · 历史数据从上线之日起累计`;
+}
+
+const card=(n,t,c)=>`<div class="card"><div class="n" ${c?`style="color:${c}"`:''}>${n}</div><div class="t">${t}</div></div>`;
+
+function visible(){
+  let list=ITEMS.map((it,idx)=>({it,idx,s:S[it.name]}));
+  if(fCat!=='全部')list=list.filter(x=>x.it.cat===fCat);
+  if(fSearch)list=list.filter(x=>x.it.name.toLowerCase().includes(fSearch));
+  if(onlyFav)list=list.filter(x=>FAVS.has(x.it.name));
+  const sorters={
+    cat:(a,b)=>(FAVS.has(b.it.name)-FAVS.has(a.it.name))||((a.it.cat===b.it.cat)?(Math.abs(b.it.pct||0)-Math.abs(a.it.pct||0)):a.it.cat.localeCompare(b.it.cat,'zh')),
+    fav:(a,b)=>(FAVS.has(b.it.name)-FAVS.has(a.it.name))||a.it.name.localeCompare(b.it.name,'zh'),
+    pct:(a,b)=>(a.it.pct??-999)-(b.it.pct??-999),
+    gap:(a,b)=>(a.s.gap??999)-(b.s.gap??999),
+    price:(a,b)=>a.it.price-b.it.price,
+    pct30:(a,b)=>(a.s.pct30??999)-(b.s.pct30??999)
+  };
+  return list.sort(sorters[fSort]||sorters.cat);
+}
+
+function renderRows(){
+  const list=visible();
+  document.getElementById('count').textContent=`共 ${list.length} 款`;
+  const rows=document.getElementById('rows');
+  rows.innerHTML=list.map(({it,idx,s})=>{
+    const a=advice(it,s);
+    const col=CAT_COLORS[it.cat]||'#8a93a3';
+    const gapTxt=s.gap==null?'-':(s.gap<=0.5?'<span class="gap-good">触底</span>':`+${s.gap.toFixed(1)}%`);
+    const fav=FAVS.has(it.name);
+    return `<tr data-i="${idx}">
+      <td class="name"><span class="star ${fav?'on':''}" data-fav="${esc(it.name)}">${fav?'★':'☆'}</span><span class="cat-tag" style="background:${col}">${it.cat}</span><a href="${it.url}" target="_blank" onclick="event.stopPropagation()">${esc(it.name)}</a></td>
       <td class="price">${fmt(it.price)}</td>
-      <td>${fmt(it.prev)}</td>
+      <td>${it.jd!=null?`<span class="jdtag">京</span>${fmt(it.jd)}`:'—'}</td>
       <td>${pctSpan(it.pct)}</td>
-      <td class="lowcol">${it.low!=null?fmt(it.low):'-'}</td>
-      <td>${spark(it.history)}</td>
+      <td class="${a.c==='bargain'?'bargain':''}">${s.len>=2?fmt(s.min):'—'}</td>
+      <td>${s.len>=2?gapTxt:'—'}</td>
+      <td class="hidem">${spark(it.history)}</td>
+      <td class="adv-${a.c}">${a.t}</td>
     </tr>`;
   }).join('');
-  rows.querySelectorAll('tr').forEach(tr=>tr.onclick=()=>{ sel=+tr.dataset.i; pick.value=sel; drawChart(); markSel(); });
-  markSel();
-  drawChart();
-
-  const days = ITEMS.length? Math.max(...ITEMS.map(i=>i.days)) : 0;
-  document.getElementById('foot').innerHTML =
-    `数据来源: 中关村在线(ZOL) 参考报价 · 已连续记录 ${days} 天 · 本地小模型(Qwen2.5-0.5B)与规则共同维护`;
+  rows.querySelectorAll('tr').forEach(tr=>tr.onclick=e=>{
+    if(e.target.dataset.fav!==undefined){
+      const n=e.target.dataset.fav;
+      FAVS.has(n)?FAVS.delete(n):FAVS.add(n);
+      saveFavs();renderRows();return;
+    }
+    sel=+tr.dataset.i;pick.value=sel;drawChart();markSel();
+  });
 }
 
-const esc = s => s.replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const card = (n,t,c) => `<div class="card"><div class="n" ${c?`style="color:${c}"`:''}>${n}</div><div class="t">${t}</div></div>`;
-
-function markSel(){
-  document.querySelectorAll('#rows tr').forEach(tr=>tr.classList.toggle('sel', +tr.dataset.i===sel));
-}
+function markSel(){document.querySelectorAll('#rows tr').forEach(tr=>tr.classList.toggle('sel',+tr.dataset.i===sel));}
 
 function spark(hist){
-  if(!hist || !hist.length) return '';
-  const v = hist.slice(-30).map(h=>h.p);
-  const w=110,h=28,pad=3;
-  const lo=Math.min(...v), hi=Math.max(...v), span=hi-lo;
-  const color = v.length>1 ? (v[v.length-1]>v[0]?UP:(v[v.length-1]<v[0]?DOWN:FLAT)) : FLAT;
-  const pts = v.map((p,i)=>{
-    const x = pad+(w-2*pad)*(v.length>1? i/(v.length-1):0);
-    const y = h-pad-(span? (h-2*pad)*(p-lo)/span : 0);
+  if(!hist||!hist.length)return '';
+  const v=hist.slice(-30).map(h=>h.p);
+  const w=100,h=26,pad=3;
+  const lo=Math.min(...v),hi=Math.max(...v),span=hi-lo;
+  const color=v.length>1?(v[v.length-1]>v[0]?UP:(v[v.length-1]<v[0]?DOWN:FLAT)):FLAT;
+  const pts=v.map((p,i)=>{
+    const x=pad+(w-2*pad)*(v.length>1?i/(v.length-1):0);
+    const y=h-pad-(span?(h-2*pad)*(p-lo)/span:0);
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   }).join(' ');
   return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5"/></svg>`;
 }
 
 function drawChart(){
-  const it = ITEMS[sel]; if(!it) return;
-  let hist = it.history || [];
-  if (rangeN>0) hist = hist.slice(-rangeN);
-  const svg = document.getElementById('chart');
-  const W=860,H=300,L=64,R=16,T=18,B=34;
-  if (hist.length===0){ svg.innerHTML=''; return; }
-  const vals = hist.map(h=>h.p);
-  let lo=Math.min(...vals), hi=Math.max(...vals);
-  if (lo===hi){ lo-=1; hi+=1; }
-  const padY=(hi-lo)*0.12; lo-=padY; hi+=padY;
-  const X = i => L+(W-L-R)*(hist.length>1? i/(hist.length-1):0);
-  const Y = p => T+(H-T-B)*(1-(p-lo)/(hi-lo));
-  const color = vals[vals.length-1]>vals[0] ? UP : (vals[vals.length-1]<vals[0] ? DOWN : FLAT);
-
+  const it=ITEMS[sel];if(!it)return;
+  const s=S[it.name];
+  document.getElementById('chart-title').textContent='— '+it.name;
+  let hist;
+  if(rangeN===-1){
+    hist=(it.today||[]).map(x=>({d:'今日 '+x.h,p:x.p}));
+  }else{
+    hist=it.history||[];
+    if(rangeN>0)hist=hist.slice(-rangeN);
+  }
+  const svg=document.getElementById('chart');
+  const W=880,H=300,L=64,R=16,T=18,B=34;
+  if(!hist.length){svg.innerHTML='<text x="440" y="150" text-anchor="middle" font-size="13" fill="#8a93a3">暂无该时段数据</text>';return;}
+  const vals=hist.map(h=>h.p);
+  let lo=Math.min(...vals),hi=Math.max(...vals);
+  if(lo===hi){lo-=1;hi+=1;}
+  const padY=(hi-lo)*0.12;lo-=padY;hi+=padY;
+  const X=i=>L+(W-L-R)*(hist.length>1?i/(hist.length-1):0.5);
+  const Y=p=>T+(H-T-B)*(1-(p-lo)/(hi-lo));
+  const color=vals[vals.length-1]>vals[0]?UP:(vals[vals.length-1]<vals[0]?DOWN:FLAT);
+  const yLabel=p=>(hi-lo)<10?p.toFixed(1):Math.round(p).toLocaleString();
   let g='';
-  const yLabel = p => (hi-lo)<10 ? p.toFixed(1) : Math.round(p).toLocaleString();
   for(let k=0;k<=4;k++){
-    const p = lo+(hi-lo)*k/4, y=Y(p);
-    g += `<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#eef1f6"/>` +
-         `<text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" fill="#8a93a3">${yLabel(p)}</text>`;
+    const p=lo+(hi-lo)*k/4,y=Y(p);
+    g+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#eef1f6"/>`+
+       `<text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" fill="#8a93a3">${yLabel(p)}</text>`;
   }
-  const lblIdx = hist.length<=2 ? hist.map((_,i)=>i) : [0, Math.floor((hist.length-1)/2), hist.length-1];
-  for(const i of lblIdx){
-    const d = hist[i].d.slice(5);
-    g += `<text x="${X(i)}" y="${H-10}" text-anchor="middle" font-size="11" fill="#8a93a3">${d}</text>`;
+  const lblIdx=hist.length<=2?hist.map((_,i)=>i):[0,Math.floor((hist.length-1)/2),hist.length-1];
+  for(const i of lblIdx)g+=`<text x="${X(i)}" y="${H-10}" text-anchor="middle" font-size="11" fill="#8a93a3">${hist[i].d.length>6?hist[i].d.slice(-5):hist[i].d}</text>`;
+  if(rangeN!==-1&&s.avg30){
+    const ay=Y(Math.min(Math.max(s.avg30,lo),hi));
+    g+=`<line x1="${L}" y1="${ay}" x2="${W-R}" y2="${ay}" stroke="#7a8b3c" stroke-dasharray="5 4" stroke-width="1.2"/>`+
+       `<text x="${W-R}" y="${ay-5}" text-anchor="end" font-size="10.5" fill="#7a8b3c">30天均价 ${fmt(s.avg30)}</text>`;
   }
-  const pts = vals.map((p,i)=>`${X(i).toFixed(1)},${Y(p).toFixed(1)}`).join(' ');
-  const area = hist.length>1 ? `<polygon points="${X(0)},${H-B} ${pts} ${X(vals.length-1)},${H-B}" fill="${color}" opacity="0.07"/>` : '';
-  const dot = `<circle cx="${X(vals.length-1)}" cy="${Y(vals[vals.length-1])}" r="3.5" fill="${color}"/>`;
+  const pts=vals.map((p,i)=>`${X(i).toFixed(1)},${Y(p).toFixed(1)}`).join(' ');
+  const area=hist.length>1?`<polygon points="${X(0)},${H-B} ${pts} ${X(vals.length-1)},${H-B}" fill="${color}" opacity="0.07"/>`:'';
+  const dot=`<circle cx="${X(vals.length-1)}" cy="${Y(vals[vals.length-1])}" r="3.5" fill="${color}"/>`;
   let hover='';
-  if (hoverX>=0 && hist.length>1){
-    const i = Math.round(hoverX/(W-L-R)*(hist.length-1));
-    const ii = Math.max(0, Math.min(hist.length-1, i));
-    hover = `<line x1="${X(ii)}" y1="${T}" x2="${X(ii)}" y2="${H-B}" stroke="#c6cfdd" stroke-dasharray="3 3"/>` +
-            `<circle cx="${X(ii)}" cy="${Y(vals[ii])}" r="4" fill="#fff" stroke="${color}" stroke-width="2"/>`;
-    const tt = document.getElementById('tooltip');
+  if(hoverX>=0&&hist.length>1){
+    const i=Math.max(0,Math.min(hist.length-1,Math.round(hoverX/(W-L-R)*(hist.length-1))));
+    hover=`<line x1="${X(i)}" y1="${T}" x2="${X(i)}" y2="${H-B}" stroke="#c6cfdd" stroke-dasharray="3 3"/>`+
+          `<circle cx="${X(i)}" cy="${Y(vals[i])}" r="4" fill="#fff" stroke="${color}" stroke-width="2"/>`;
+    const tt=document.getElementById('tooltip');
     tt.style.display='block';
-    const bx = Math.min(Math.max(X(ii)/W*100, 8), 92);
-    tt.style.left = bx+'%'; tt.style.top = '6px';
-    tt.innerHTML = `<b>${esc(hist[ii].d)}</b>　${fmt(vals[ii])}`;
-  } else {
-    document.getElementById('tooltip').style.display='none';
-  }
-  svg.innerHTML = g + area + `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linejoin="round"/>` + dot + hover;
-  svg.onmousemove = e => {
-    const rect = svg.getBoundingClientRect();
-    const x = (e.clientX-rect.left)/rect.width*W;
-    hoverX = (x>=L && x<=W-R) ? x-L : -1;
+    tt.style.left=Math.min(Math.max(X(i)/W*100,8),90)+'%';tt.style.top='6px';
+    tt.innerHTML=`<b>${esc(hist[i].d)}</b>　${fmt(vals[i])}`;
+  }else document.getElementById('tooltip').style.display='none';
+  svg.innerHTML=g+area+`<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linejoin="round"/>`+dot+hover;
+  svg.onmousemove=e=>{
+    const rect=svg.getBoundingClientRect();
+    const x=(e.clientX-rect.left)/rect.width*W;
+    hoverX=(x>=L&&x<=W-R)?x-L:-1;
     drawChart();
   };
-  svg.onmouseleave = () => { hoverX=-1; drawChart(); };
+  svg.onmouseleave=()=>{hoverX=-1;drawChart();};
 }
 
-document.getElementById('range').onclick = e => {
-  if(e.target.dataset.n===undefined) return;
-  rangeN = +e.target.dataset.n;
-  document.querySelectorAll('#range button').forEach(b=>b.classList.toggle('on', b===e.target));
+document.getElementById('range').onclick=e=>{
+  if(e.target.dataset.n===undefined)return;
+  rangeN=+e.target.dataset.n;
+  document.querySelectorAll('#range button').forEach(b=>b.classList.toggle('on',b===e.target));
   drawChart();
+};
+document.getElementById('search').oninput=e=>{fSearch=e.target.value.trim().toLowerCase();renderRows();};
+document.getElementById('catSel').onchange=e=>{fCat=e.target.value;renderRows();};
+document.getElementById('sortSel').onchange=e=>{fSort=e.target.value;renderRows();};
+document.getElementById('onlyFav').onclick=e=>{onlyFav=!onlyFav;e.target.classList.toggle('on');renderRows();};
+document.getElementById('exportCsv').onclick=()=>{
+  let csv='分类,商品,参考价,京东价,今日涨跌%,白菜价,URL\n';
+  for(const it of ITEMS){
+    const s=S[it.name];
+    csv+=`${it.cat},"${it.name}",${it.price??''},${it.jd??''},${it.pct??''},${s.min??''},${it.url}\n`;
+  }
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));
+  a.download='pc-parts-prices.csv';a.click();
 };
 
 load();
-setInterval(load, 10*60*1000);
+setInterval(load,10*60*1000);
 </script>
 </body>
 </html>
