@@ -1,0 +1,71 @@
+name: daily-price-update
+
+on:
+  schedule:
+    - cron: '0 1 * * *'   # UTC 01:00 = 北京时间每天 09:00
+  workflow_dispatch:        # 支持在网页上手动触发
+  push:
+    branches: [main]        # 首次推送后立即跑一次，方便验证
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-price-update
+  cancel-in-progress: true
+
+jobs:
+  update-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 安装小模型运行库（失败则退回纯规则模式）
+        run: |
+          pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu \
+            || pip install llama-cpp-python \
+            || echo "::warning::llama-cpp 安装失败，本次改用纯规则模式"
+
+      - name: 下载小模型（约400MB，仅本次运行期间存在）
+        run: python tracker.py model-setup || true
+
+      - name: 更新全部商品价格并生成网页数据
+        run: python tracker.py run
+
+      - name: 把最新价格历史提交回仓库
+        run: |
+          git config user.name "price-bot"
+          git config user.email "price-bot@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "价格无变化，跳过提交"
+          else
+            git commit -m "auto: update prices $(date +%F)"
+            git push
+          fi
+
+      - name: 配置 GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: 打包网页看板
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+
+      - name: 发布到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

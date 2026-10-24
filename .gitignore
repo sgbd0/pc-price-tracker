@@ -1,0 +1,15 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# 本地运行产物（云端不需要，且体积大）
+models/
+logs/
+cloudflared.exe
+*.part
+*.gguf
+
+# 本地网页服务日志
+webserver_*.log
+tools/

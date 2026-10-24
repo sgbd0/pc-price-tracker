@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>电脑配件价格看板</title>
+<style>
+:root{--up:#d9412f;--down:#1f9d55;--flat:#8a93a3;--bg:#f4f6fa;--card:#fff;--line:#e8ecf2;--txt:#1c2330;--sub:#68738a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:"Microsoft YaHei",system-ui,-apple-system,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:20px 16px 40px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:14px}
+h1{font-size:21px;margin:0}
+.meta{color:var(--sub);font-size:13px}
+.pub{font-size:13px;background:#eef4ff;border:1px solid #d5e3ff;border-radius:999px;padding:3px 12px;color:#2456c4;text-decoration:none;word-break:break-all}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.card{background:var(--card);border-radius:12px;padding:12px 16px;box-shadow:0 1px 3px rgba(16,24,40,.06)}
+.card .n{font-size:24px;font-weight:700}.card .t{color:var(--sub);font-size:12px;margin-top:2px}
+.panel{background:var(--card);border-radius:12px;box-shadow:0 1px 3px rgba(16,24,40,.06);padding:14px 16px;margin-bottom:14px}
+.panel h2{font-size:15px;margin:0 0 10px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+select,.range button{font-size:13px;padding:5px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--txt)}
+.range button.on{background:#2456c4;color:#fff;border-color:#2456c4}
+#chart-box{position:relative}
+#tooltip{position:absolute;pointer-events:none;background:#101828;color:#fff;font-size:12px;padding:6px 10px;border-radius:8px;display:none;white-space:nowrap;z-index:5}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{color:var(--sub);font-weight:600;font-size:12.5px;background:#f8fafc}
+td.name{white-space:normal;min-width:180px}
+tbody tr{cursor:pointer}tbody tr:hover{background:#f6f9ff}
+tbody tr.sel{background:#eef4ff}
+.pct{font-weight:600}.up{color:var(--up)}.down{color:var(--down)}.flat{color:var(--flat)}
+.price{font-weight:700}
+a{color:#2456c4;text-decoration:none}a:hover{text-decoration:underline}
+footer{color:var(--sub);font-size:12px;margin-top:10px;line-height:1.7}
+@media(max-width:640px){th,td{padding:7px 6px}.lowcol,.highcol{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🖥️ 电脑配件价格看板</h1>
+    <span class="meta" id="updated"></span>
+    <a class="pub" id="pub" style="display:none" target="_blank"></a>
+  </header>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="panel">
+    <h2>价格走势</h2>
+    <div class="controls">
+      <select id="pick"></select>
+      <span class="range" id="range">
+        <button data-n="30" class="on">近30天</button>
+        <button data-n="90">近90天</button>
+        <button data-n="0">全部</button>
+      </span>
+    </div>
+    <div id="chart-box">
+      <svg id="chart" viewBox="0 0 860 300" width="100%"></svg>
+      <div id="tooltip"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>全部商品</h2>
+    <table>
+      <thead><tr><th>分类</th><th>商品</th><th>今日价</th><th>上次价</th><th>涨跌</th><th class="lowcol">记录期最低</th><th>走势</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+const UP='#d9412f', DOWN='#1f9d55', FLAT='#8a93a3';
+let DATA=null, ITEMS=[], sel=0, rangeN=30, hoverX=-1;
+
+const fmt = n => n==null ? '-' : '¥'+n.toLocaleString('zh-CN', {maximumFractionDigits:0});
+const pctSpan = p => {
+  if (p==null) return '<span class="flat">新增</span>';
+  if (p>0.05)  return `<span class="pct up">▲ +${p.toFixed(1)}%</span>`;
+  if (p<-0.05) return `<span class="pct down">▼ ${p.toFixed(1)}%</span>`;
+  return '<span class="flat">— 持平</span>';
+};
+
+async function load(){
+  let r;
+  try { r = await fetch('/api/data', {cache:'no-store'}); if(!r.ok) throw 0; }
+  catch(e){ r = await fetch('data.json', {cache:'no-store'}); }
+  DATA = await r.json();
+  ITEMS = DATA.items.filter(it=>it.price!=null);
+  render();
+}
+
+function render(){
+  document.getElementById('updated').textContent = '更新于 ' + (DATA.updated||'-');
+  const pub = document.getElementById('pub');
+  if (DATA.public_url){ pub.style.display=''; pub.href=DATA.public_url; pub.textContent='🌐 公开地址: '+DATA.public_url; }
+
+  const ups   = ITEMS.filter(i=>i.pct!=null && i.pct>0.05).length;
+  const downs = ITEMS.filter(i=>i.pct!=null && i.pct<-0.05).length;
+  const flats = ITEMS.filter(i=>i.pct!=null && Math.abs(i.pct)<=0.05).length;
+  document.getElementById('cards').innerHTML =
+    card(ITEMS.length,'监控商品')+card(ups,'今日上涨',UP)+card(downs,'今日下跌',DOWN)+card(flats,'今日持平');
+
+  const pick = document.getElementById('pick');
+  pick.innerHTML = ITEMS.map((it,i)=>`<option value="${i}">${it.name}</option>`).join('');
+  pick.value = Math.min(sel, Math.max(ITEMS.length-1,0));
+  pick.onchange = e => { sel=+e.target.value; drawChart(); markSel(); };
+
+  const rows = document.getElementById('rows');
+  rows.innerHTML = DATA.items.map((it,i)=>{
+    const cls = ITEMS[i]===it ? '' : '';
+    return `<tr data-i="${i}">
+      <td>${it.cat||'配件'}</td>
+      <td class="name"><a href="${it.url}" target="_blank" onclick="event.stopPropagation()">${esc(it.name)}</a></td>
+      <td class="price">${fmt(it.price)}</td>
+      <td>${fmt(it.prev)}</td>
+      <td>${pctSpan(it.pct)}</td>
+      <td class="lowcol">${it.low!=null?fmt(it.low):'-'}</td>
+      <td>${spark(it.history)}</td>
+    </tr>`;
+  }).join('');
+  rows.querySelectorAll('tr').forEach(tr=>tr.onclick=()=>{ sel=+tr.dataset.i; pick.value=sel; drawChart(); markSel(); });
+  markSel();
+  drawChart();
+
+  const days = ITEMS.length? Math.max(...ITEMS.map(i=>i.days)) : 0;
+  document.getElementById('foot').innerHTML =
+    `数据来源: 中关村在线(ZOL) 参考报价 · 已连续记录 ${days} 天 · 本地小模型(Qwen2.5-0.5B)与规则共同维护`;
+}
+
+const esc = s => s.replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const card = (n,t,c) => `<div class="card"><div class="n" ${c?`style="color:${c}"`:''}>${n}</div><div class="t">${t}</div></div>`;
+
+function markSel(){
+  document.querySelectorAll('#rows tr').forEach(tr=>tr.classList.toggle('sel', +tr.dataset.i===sel));
+}
+
+function spark(hist){
+  if(!hist || !hist.length) return '';
+  const v = hist.slice(-30).map(h=>h.p);
+  const w=110,h=28,pad=3;
+  const lo=Math.min(...v), hi=Math.max(...v), span=hi-lo;
+  const color = v.length>1 ? (v[v.length-1]>v[0]?UP:(v[v.length-1]<v[0]?DOWN:FLAT)) : FLAT;
+  const pts = v.map((p,i)=>{
+    const x = pad+(w-2*pad)*(v.length>1? i/(v.length-1):0);
+    const y = h-pad-(span? (h-2*pad)*(p-lo)/span : 0);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5"/></svg>`;
+}
+
+function drawChart(){
+  const it = ITEMS[sel]; if(!it) return;
+  let hist = it.history || [];
+  if (rangeN>0) hist = hist.slice(-rangeN);
+  const svg = document.getElementById('chart');
+  const W=860,H=300,L=64,R=16,T=18,B=34;
+  if (hist.length===0){ svg.innerHTML=''; return; }
+  const vals = hist.map(h=>h.p);
+  let lo=Math.min(...vals), hi=Math.max(...vals);
+  if (lo===hi){ lo-=1; hi+=1; }
+  const padY=(hi-lo)*0.12; lo-=padY; hi+=padY;
+  const X = i => L+(W-L-R)*(hist.length>1? i/(hist.length-1):0);
+  const Y = p => T+(H-T-B)*(1-(p-lo)/(hi-lo));
+  const color = vals[vals.length-1]>vals[0] ? UP : (vals[vals.length-1]<vals[0] ? DOWN : FLAT);
+
+  let g='';
+  const yLabel = p => (hi-lo)<10 ? p.toFixed(1) : Math.round(p).toLocaleString();
+  for(let k=0;k<=4;k++){
+    const p = lo+(hi-lo)*k/4, y=Y(p);
+    g += `<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#eef1f6"/>` +
+         `<text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" fill="#8a93a3">${yLabel(p)}</text>`;
+  }
+  const lblIdx = hist.length<=2 ? hist.map((_,i)=>i) : [0, Math.floor((hist.length-1)/2), hist.length-1];
+  for(const i of lblIdx){
+    const d = hist[i].d.slice(5);
+    g += `<text x="${X(i)}" y="${H-10}" text-anchor="middle" font-size="11" fill="#8a93a3">${d}</text>`;
+  }
+  const pts = vals.map((p,i)=>`${X(i).toFixed(1)},${Y(p).toFixed(1)}`).join(' ');
+  const area = hist.length>1 ? `<polygon points="${X(0)},${H-B} ${pts} ${X(vals.length-1)},${H-B}" fill="${color}" opacity="0.07"/>` : '';
+  const dot = `<circle cx="${X(vals.length-1)}" cy="${Y(vals[vals.length-1])}" r="3.5" fill="${color}"/>`;
+  let hover='';
+  if (hoverX>=0 && hist.length>1){
+    const i = Math.round(hoverX/(W-L-R)*(hist.length-1));
+    const ii = Math.max(0, Math.min(hist.length-1, i));
+    hover = `<line x1="${X(ii)}" y1="${T}" x2="${X(ii)}" y2="${H-B}" stroke="#c6cfdd" stroke-dasharray="3 3"/>` +
+            `<circle cx="${X(ii)}" cy="${Y(vals[ii])}" r="4" fill="#fff" stroke="${color}" stroke-width="2"/>`;
+    const tt = document.getElementById('tooltip');
+    tt.style.display='block';
+    const bx = Math.min(Math.max(X(ii)/W*100, 8), 92);
+    tt.style.left = bx+'%'; tt.style.top = '6px';
+    tt.innerHTML = `<b>${esc(hist[ii].d)}</b>　${fmt(vals[ii])}`;
+  } else {
+    document.getElementById('tooltip').style.display='none';
+  }
+  svg.innerHTML = g + area + `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linejoin="round"/>` + dot + hover;
+  svg.onmousemove = e => {
+    const rect = svg.getBoundingClientRect();
+    const x = (e.clientX-rect.left)/rect.width*W;
+    hoverX = (x>=L && x<=W-R) ? x-L : -1;
+    drawChart();
+  };
+  svg.onmouseleave = () => { hoverX=-1; drawChart(); };
+}
+
+document.getElementById('range').onclick = e => {
+  if(e.target.dataset.n===undefined) return;
+  rangeN = +e.target.dataset.n;
+  document.querySelectorAll('#range button').forEach(b=>b.classList.toggle('on', b===e.target));
+  drawChart();
+};
+
+load();
+setInterval(load, 10*60*1000);
+</script>
+</body>
+</html>
