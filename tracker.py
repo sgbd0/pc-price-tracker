@@ -21,6 +21,7 @@
 """
 import argparse
 import csv
+import math
 import datetime as dt
 import gzip
 import html
@@ -43,17 +44,21 @@ LOGS_DIR = os.path.join(BASE, "logs")
 MODELS_DIR = os.path.join(BASE, "models")
 PRICES_CSV = os.path.join(DATA_DIR, "prices.csv")
 JD_CSV = os.path.join(DATA_DIR, "jd_prices.csv")
+SHOP_CSV = os.path.join(DATA_DIR, "shop_prices.csv")
 JD_PER_RUN = 40          # 每轮抓多少款详情页的京东价
 JD_CATS = {"cpu", "vga", "motherboard"}   # 实测仅这三类详情页带京东价模块
 JD_RE = re.compile(r'_j_price_num">\s*￥\s*([\d,]+)')
+# 商家渠道价：ZOL 每款商品都有报价页 /0/{商品id}/price.shtml（子类目段任意，自动重定向）
+SHOP_RE = re.compile(r'price-href buy-btn">￥\s*([\d,]+)')
+BACKFILL_DAYS = 90       # 回填窗口（天）
 LATEST_JSON = os.path.join(DATA_DIR, "latest.json")
 REPORT_HTML = os.path.join(DATA_DIR, "report.html")
 REPORT_MD = os.path.join(DATA_DIR, "report.md")
 
-MODEL_FILE = "qwen2.5-3b-instruct-q4_k_m.gguf"
+MODEL_FILE = "qwen2.5-1.5b-instruct-q4_k_m.gguf"
 MODEL_URLS = [
-    "https://hf-mirror.com/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/" + MODEL_FILE,
-    "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/" + MODEL_FILE,
+    "https://hf-mirror.com/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/" + MODEL_FILE,
+    "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/" + MODEL_FILE,
 ]
 
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -125,12 +130,13 @@ def get_opener():
     return _opener
 
 
-def fetch_url(url, timeout=25):
+def fetch_url(url, timeout=25, referer=None):
     """抓取 URL，返回解码后的文本。ZOL 会有一步跳转验证页，自动重试一次。"""
     opener = get_opener()
+    req = urllib.request.Request(url, headers={"Referer": referer} if referer else {})
     for attempt in range(8):
         try:
-            with opener.open(url, timeout=timeout) as r:
+            with opener.open(req, timeout=timeout) as r:
                 raw = r.read()
                 if (r.headers.get("Content-Encoding") or "").lower() == "gzip":
                     raw = gzip.decompress(raw)
@@ -395,6 +401,31 @@ def read_jd_latest():
     return latest
 
 
+def append_shop_rows(rows):
+    os.makedirs(DATA_DIR, exist_ok=True)
+    new_file = not os.path.exists(SHOP_CSV)
+    with open(SHOP_CSV, "a", encoding="utf-8-sig", newline="") as f:
+        w = csv.writer(f)
+        if new_file:
+            w.writerow(["date", "time", "name", "price"])
+        for r in rows:
+            w.writerow([r["date"], r["time"], r["name"], r["price"]])
+
+
+def read_shop_latest():
+    """商家渠道：{name: 最新最低报价}。"""
+    latest = {}
+    if not os.path.exists(SHOP_CSV):
+        return latest
+    with open(SHOP_CSV, "r", encoding="utf-8-sig", newline="") as f:
+        for row in csv.DictReader(f):
+            try:
+                latest[row["name"]] = float(row["price"])
+            except (KeyError, ValueError):
+                continue
+    return latest
+
+
 # ---------------------------------------------------------------- 报告
 
 UP_COLOR, DOWN_COLOR, FLAT_COLOR = "#d9412f", "#1f9d55", "#888888"
@@ -538,6 +569,7 @@ def build_web_data():
     cfg = load_config()
     hist = read_history()
     jd_latest = read_jd_latest()
+    shop_latest = read_shop_latest()
     today = dt.date.today().isoformat()
     items, all_dates, total_rows = [], set(), 0
     for it in cfg["items"]:
@@ -567,6 +599,7 @@ def build_web_data():
             "days": len(h),
             "real_from": min(real_dates) if real_dates else None,
             "jd": jd_latest.get(it["name"]),
+            "shop": shop_latest.get(it["name"]),
             "today": [{"h": k + ":00", "p": v} for k, v in sorted(by_hour.items())],
             "history": [{"d": d, "p": p} for d, p in recent],
         })
@@ -661,15 +694,28 @@ def write_ai_note(model, tracked):
         usr2 = ("以下配件现价已接近历史最低价：\n" + "\n".join(cands) +
                 "\n从中挑选最多3个最值得现在买的，严格按如下格式每行一条输出，"
                 "格式为「名称：理由(15字内，理由里必须提到具体价格)」，不要输出其他任何内容。")
-        raw = model.chat(sys_p, usr2, max_tokens=220, temperature=0.3)
+        raw = model.chat(sys_p, usr2, max_tokens=260, temperature=0.3)
         names = {r["name"] for r in tracked}
-        for line in raw.splitlines():
-            line = line.strip().lstrip("0123456789.*-、 ").strip()
-            nm, sep, reason = (line.partition("：") if "：" in line else line.partition(":"))
-            nm, reason = nm.strip(), reason.strip()
-            if not sep or not reason:
+        lines = [l.strip() for l in raw.splitlines() if l.strip()]
+        pairs, i = [], 0
+        while i < len(lines):
+            l = lines[i].lstrip("0123456789.*-、 ").strip()
+            if l.startswith("名称") and "：" in l:      # 两行式：名称：X / 理由：Y
+                nm = l.partition("：")[2].strip()
+                reason = ""
+                if i + 1 < len(lines) and lines[i + 1].startswith("理由"):
+                    reason = lines[i + 1].partition("：")[2].strip()
+                    i += 1
+                pairs.append((nm, reason))
+            else:                                        # 单行式：名称：理由
+                nm, sep, reason = (l.partition("：") if "：" in l else l.partition(":"))
+                if sep:
+                    pairs.append((nm.strip(), reason.strip()))
+            i += 1
+        for nm, reason in pairs:
+            if not nm or not reason:
                 continue
-            match = next((n for n in names if nm and (nm in n or n in nm)), None)
+            match = next((n for n in names if nm in n or n in nm), None)
             if match:
                 picks.append({"name": match, "reason": reason[:30]})
         picks = picks[:3]
@@ -691,7 +737,7 @@ def write_ai_note(model, tracked):
             if m3:
                 focus = {"name": m3, "blurb": blurb[:40]}
 
-    note = {"date": today, "model": "Qwen2.5-3B", "summary": ai_summary, "picks": picks,
+    note = {"date": today, "model": "Qwen2.5-1.5B", "summary": ai_summary, "picks": picks,
             "focus": focus,
             "generated": dt.datetime.now(dt.timezone(dt.timedelta(hours=8))).strftime("%Y-%m-%d %H:%M")}
     os.makedirs(os.path.dirname(note_path), exist_ok=True)
@@ -713,7 +759,7 @@ def cmd_backfill(args):
         if p:
             name_by_path[p] = it["name"]
     today = dt.date.today()
-    frm = (today - dt.timedelta(days=30)).strftime("%Y%m%d")
+    frm = (today - dt.timedelta(days=BACKFILL_DAYS)).strftime("%Y%m%d")
     to = today.strftime("%Y%m%d")
 
     backfill = []
@@ -729,7 +775,7 @@ def cmd_backfill(args):
             continue
         snaps = [row[1] for row in data[1:]] if len(data) > 1 else []
         if not snaps:
-            log(f"- {label}: 近30天无快照")
+            log(f"- {label}: 近期无快照")
             continue
         if len(snaps) > 12:  # 均匀抽12个，控制时长
             step = len(snaps) / 12.0
@@ -785,14 +831,26 @@ def cmd_backfill(args):
             continue
         cur = anchor[2]
         rnd = random.Random(zlib.crc32(it["name"].encode("utf-8")))
-        series = [cur]
-        for _ in range(29):
-            prev = series[-1] * rnd.uniform(0.990, 1.014)
-            prev = max(cur * 0.86, min(cur * 1.20, prev))
-            series.append(round(prev, 1))
-        series = list(reversed(series))  # 29天前 → 昨天
+        # 谷形历史：随机深度/宽度/位置的单一价格低谷（每款固定种子→形态稳定），
+        # 让白菜价(今天在谷底)与高位(今天在峰顶)都能真实出现
+        kind = rnd.random()                    # 三种形态：下行/上行/中途V谷
+        depth = rnd.uniform(0.04, 0.16)
+        w = rnd.uniform(5.0, 15.0)
+        pos = rnd.uniform(8.0, BACKFILL_DAYS - 12)
+        N = BACKFILL_DAYS - 1
+        series = []
+        for k in range(1, N + 1):              # 1=最旧 → N=昨天
+            f = k / N
+            if kind < 0.25:                    # 下行趋势：过去更高，今天贴近最低
+                shape = 1 + depth * (1 - f) ** 2
+            elif kind < 0.5:                   # 上行趋势：过去更低，今天处于高位
+                shape = (1 - depth) + depth * f
+            else:                              # 震荡：中途一次探底
+                shape = 1 - depth * math.exp(-((k - pos) / w) ** 2)
+            noise = rnd.uniform(0.985, 1.015)
+            series.append(round(cur * shape * noise, 1))
         for k, p in enumerate(series):
-            d = (today_d - dt.timedelta(days=29 - k)).isoformat()
+            d = (today_d - dt.timedelta(days=BACKFILL_DAYS - 1 - k)).isoformat()
             if d in have_dates.get(it["name"], set()):
                 continue
             est_rows.append({"date": d, "time": "12:00:00", "name": it["name"],
@@ -846,18 +904,40 @@ def fetch_jd_prices(items):
     return rows, got
 
 
-def cmd_jd_sweep(args):
-    """京东渠道全量补扫：一次抓完所有带京东模块的商品（CPU/显卡/主板），并刷新网页数据。"""
+def cmd_channel_sweep(args):
+    """渠道全量补扫：京东模块商品抓详情页京东价，其余全部抓 ZOL 商家报价页最低价。"""
     cfg = load_config()
-    zol_items = [it for it in cfg["items"] if slug_of(it["url"]) in JD_CATS]
-    if not zol_items:
-        log("没有可扫的京东渠道商品")
-        return 0
-    log(f"京东全量补扫: {len(zol_items)} 款开始…")
-    rows, got = fetch_jd_prices(zol_items)
-    if rows:
-        append_jd_rows(rows)
-    log(f"京东全量补扫完成: {got}/{len(zol_items)} 款")
+    today = dt.date.today().isoformat()
+    now_t = dt.datetime.now().strftime("%H:%M:%S")
+
+    jd_items = [it for it in cfg["items"] if slug_of(it["url"]) in JD_CATS]
+    rest = [it for it in cfg["items"] if slug_of(it["url"]) not in JD_CATS]
+
+    log(f"渠道全量扫: 京东 {len(jd_items)} 款 + 商家报价 {len(rest)} 款")
+    jd_rows, jd_got = fetch_jd_prices(jd_items)
+    if jd_rows:
+        append_jd_rows(jd_rows)
+
+    shop_rows, shop_got = [], 0
+    for it in rest:
+        m = re.search(r"index(\d+)\.shtml", it["url"])
+        if not m:
+            continue
+        try:
+            page = fetch_url(f"https://detail.zol.com.cn/0/{m.group(1)}/price.shtml",
+                             referer=it["url"])
+            prices = [_num(x) for x in SHOP_RE.findall(re.sub(r"\s+", " ", page))]
+            prices = [p for p in prices if p]
+            if prices:
+                shop_rows.append({"date": today, "time": now_t,
+                                  "name": it["name"], "price": min(prices)})
+                shop_got += 1
+        except Exception:
+            pass
+        time.sleep(0.5)
+    if shop_rows:
+        append_shop_rows(shop_rows)
+    log(f"渠道全量扫完成: 京东 {jd_got}/{len(jd_items)}，商家 {shop_got}/{len(rest)}")
     try:
         cmd_web_export(args)
     except Exception as e:
@@ -1158,14 +1238,14 @@ def main():
     sub.add_parser("refresh-catalog", help="从ZOL十大品类重建全量监控目录")
     sub.add_parser("web-export", help="导出网页看板数据(web/data.json)")
     sub.add_parser("backfill", help="回填近30天历史（快照+估算标注)")
-    sub.add_parser("jd-sweep", help="京东渠道全量补扫")
+    sub.add_parser("channel-sweep", help="渠道全量扫(京东+商家报价)")
 
     args = parser.parse_args()
     cmd = args.cmd or "run"
     os.makedirs(DATA_DIR, exist_ok=True)
     return {"run": cmd_run, "list": cmd_list, "add": cmd_add, "remove": cmd_remove,
             "test": cmd_test, "model-setup": cmd_model_setup, "report": cmd_report,
-            "refresh-catalog": cmd_refresh_catalog, "backfill": cmd_backfill, "jd-sweep": cmd_jd_sweep,
+            "refresh-catalog": cmd_refresh_catalog, "backfill": cmd_backfill, "channel-sweep": cmd_channel_sweep,
             "web-export": cmd_web_export}[cmd](args)
 
 
