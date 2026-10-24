@@ -40,14 +40,18 @@ DATA_DIR = os.path.join(BASE, "data")
 LOGS_DIR = os.path.join(BASE, "logs")
 MODELS_DIR = os.path.join(BASE, "models")
 PRICES_CSV = os.path.join(DATA_DIR, "prices.csv")
+JD_CSV = os.path.join(DATA_DIR, "jd_prices.csv")
+JD_PER_RUN = 40          # 每轮抓多少款详情页的京东价
+JD_CATS = {"cpu", "vga", "motherboard"}   # 实测仅这三类详情页带京东价模块
+JD_RE = re.compile(r'_j_price_num">\s*￥\s*([\d,]+)')
 LATEST_JSON = os.path.join(DATA_DIR, "latest.json")
 REPORT_HTML = os.path.join(DATA_DIR, "report.html")
 REPORT_MD = os.path.join(DATA_DIR, "report.md")
 
-MODEL_FILE = "qwen2.5-0.5b-instruct-q4_k_m.gguf"
+MODEL_FILE = "qwen2.5-3b-instruct-q4_k_m.gguf"
 MODEL_URLS = [
-    "https://hf-mirror.com/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/" + MODEL_FILE,
-    "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/" + MODEL_FILE,
+    "https://hf-mirror.com/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/" + MODEL_FILE,
+    "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/" + MODEL_FILE,
 ]
 
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -114,6 +118,7 @@ def get_opener():
             ("User-Agent", UA),
             ("Accept", "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8"),
             ("Accept-Language", "zh-CN,zh;q=0.9"),
+            ("Referer", "https://www.zol.com.cn/"),
         ]
     return _opener
 
@@ -121,7 +126,7 @@ def get_opener():
 def fetch_url(url, timeout=25):
     """抓取 URL，返回解码后的文本。ZOL 会有一步跳转验证页，自动重试一次。"""
     opener = get_opener()
-    for attempt in range(3):
+    for attempt in range(8):
         try:
             with opener.open(url, timeout=timeout) as r:
                 raw = r.read()
@@ -142,7 +147,7 @@ def fetch_url(url, timeout=25):
         except LookupError:
             text = raw.decode("utf-8", "ignore")
         if "service.zol.com.cn/checking" in text or "service.zol.com.cn/checking" in raw[:600].decode("latin1", "ignore"):
-            time.sleep(0.8)
+            time.sleep(1.0 + attempt * 0.9)
             continue
         return text
     raise RuntimeError("页面反复跳转验证，抓取失败")
@@ -245,7 +250,7 @@ class ModelEngine:
         if os.path.exists(self.path):
             try:
                 from llama_cpp import Llama
-                log("加载本地小模型(Qwen2.5-0.5B)...")
+                log(f"加载本地小模型({MODEL_FILE})...")
                 self.llm = Llama(model_path=self.path, n_ctx=4096, verbose=False,
                                  n_threads=min(os.cpu_count() or 4, 8))
                 self.backend = "llama-cpp"
@@ -335,18 +340,19 @@ class ModelEngine:
 # ---------------------------------------------------------------- 历史数据
 
 def read_history():
-    """返回 {name: [(date_str, price), ...]}，按日期升序。"""
+    """返回 {name: [(date, price, time), ...]}，按日期+时间升序（每小时可能多条）。"""
     hist = {}
     if not os.path.exists(PRICES_CSV):
         return hist
     with open(PRICES_CSV, "r", encoding="utf-8-sig", newline="") as f:
         for row in csv.DictReader(f):
             try:
-                hist.setdefault(row["name"], []).append((row["date"], float(row["price"])))
+                hist.setdefault(row["name"], []).append(
+                    (row["date"], float(row["price"]), row.get("time", "")))
             except (KeyError, ValueError):
                 continue
     for name in hist:
-        hist[name].sort(key=lambda x: x[0])
+        hist[name].sort(key=lambda x: (x[0], x[2]))
     return hist
 
 
@@ -359,6 +365,31 @@ def append_price_rows(rows):
             w.writerow(["date", "time", "name", "price", "method", "url"])
         for r in rows:
             w.writerow([r["date"], r["time"], r["name"], r["price"], r["method"], r["url"]])
+
+
+def append_jd_rows(rows):
+    os.makedirs(DATA_DIR, exist_ok=True)
+    new_file = not os.path.exists(JD_CSV)
+    with open(JD_CSV, "a", encoding="utf-8-sig", newline="") as f:
+        w = csv.writer(f)
+        if new_file:
+            w.writerow(["date", "time", "name", "price"])
+        for r in rows:
+            w.writerow([r["date"], r["time"], r["name"], r["price"]])
+
+
+def read_jd_latest():
+    """京东渠道：{name: 最新价}（文件按时间追加，后读到覆盖前读到）。"""
+    latest = {}
+    if not os.path.exists(JD_CSV):
+        return latest
+    with open(JD_CSV, "r", encoding="utf-8-sig", newline="") as f:
+        for row in csv.DictReader(f):
+            try:
+                latest[row["name"]] = float(row["price"])
+            except (KeyError, ValueError):
+                continue
+    return latest
 
 
 # ---------------------------------------------------------------- 报告
@@ -415,7 +446,7 @@ def build_report(rows, summary_text):
             f"<tr><td><a href='{html.escape(r['url'])}' target='_blank'>{html.escape(r['name'])}</a></td>"
             f"<td class='price'>¥{r['price']:,.0f}</td>"
             f"<td>{('¥%s' % format(r['prev'], ',.0f')) if r['prev'] else '-'}</td>"
-            f"<td>{diff_html}</td><td>{sparkline_svg([p for _, p in r['history'][-14:]])}</td></tr>")
+            f"<td>{diff_html}</td><td>{sparkline_svg([x[1] for x in r['history'][-14:]])}</td></tr>")
 
     md_html = ""
     if summary_text:
@@ -447,10 +478,31 @@ a{{color:#2456c4;text-decoration:none}} a:hover{{text-decoration:underline}}
 
 # ---------------------------------------------------------------- 网页版数据
 
-CAT_MAP = [("cpu", "CPU"), ("vga", "显卡"), ("graphics", "显卡"), ("memory", "内存"),
-           ("solid_state", "固态硬盘"), ("harddisk", "机械硬盘"), ("motherboard", "主板"),
-           ("power", "电源"), ("monitor", "显示器"), ("case", "机箱"),
-           ("radiator", "散热器"), ("keyboard", "键盘"), ("mouse", "鼠标")]
+# 十大品类：ZOL 栏目 slug -> 中文名。每个品类的列表页自带该品类热门在售型号的参考报价，
+# 一次请求即可更新整个品类（监控全量 ~400 款时无需逐个抓详情页）。
+CATEGORIES = [
+    ("cpu", "CPU"), ("motherboard", "主板"), ("memory", "内存"),
+    ("vga", "显卡"), ("solid_state_drive", "固态硬盘"), ("hard_drives", "机械硬盘"),
+    ("power", "电源"), ("case", "机箱"), ("cooling_product", "散热器"), ("lcd", "显示器"),
+]
+
+CAT_MAP = [("cpu", "CPU"), ("motherboard", "主板"), ("memory", "内存"), ("vga", "显卡"),
+           ("solid_state", "固态硬盘"), ("hard_drives", "机械硬盘"), ("power", "电源"),
+           ("case", "机箱"), ("cooling", "散热器"), ("lcd", "显示器")]
+
+# 品类列表页结构：<a title="商品名" href="/slug/indexN.shtml"> … ￥价格
+LIST_RE = re.compile(r'<a title="([^"]{4,80})" href="(/[a-z_]+/index\d+\.shtml)"'
+                     r'[^>]*>.{0,120}?￥([\d,]+)')
+
+
+def slug_of(url):
+    m = re.search(r"zol\.com\.cn/([a-z_]+)/index\d+\.shtml", url)
+    return m.group(1) if m else None
+
+
+def item_path(url):
+    m = re.search(r"/[a-z_]+/index\d+\.shtml", url)
+    return m.group(0) if m else None
 
 
 def category_of(url):
@@ -478,16 +530,22 @@ def build_web_data():
     """汇总历史价格，供网页看板与静态导出使用。"""
     cfg = load_config()
     hist = read_history()
-    items = []
+    jd_latest = read_jd_latest()
+    today = dt.date.today().isoformat()
+    items, all_dates, total_rows = [], set(), 0
     for it in cfg["items"]:
         raw_h = hist.get(it["name"], [])
-        # 同一天可能跑了多次，按日期去重（保留最后一次）
-        by_date = {}
-        for d, p in raw_h:
+        total_rows += len(raw_h)
+        # 每小时更新后一天多条：按日期收敛为日线（保留最后一次），另保留今日分时
+        by_date, by_hour = {}, {}
+        for d, p, t in raw_h:
             by_date[d] = p
+            all_dates.add(d)
+            if d == today:
+                by_hour[t[:2] or "00"] = p
         h = [(d, by_date[d]) for d in sorted(by_date)]
         prices = [p for _, p in h]
-        recent = h[-180:]
+        recent = h[-90:]
         price = h[-1][1] if h else None
         prev = h[-2][1] if len(h) > 1 else None
         items.append({
@@ -497,10 +555,14 @@ def build_web_data():
             "low": min(prices) if prices else None,
             "high": max(prices) if prices else None,
             "days": len(h),
+            "jd": jd_latest.get(it["name"]),
+            "today": [{"h": k + ":00", "p": v} for k, v in sorted(by_hour.items())],
             "history": [{"d": d, "p": p} for d, p in recent],
         })
     return {"updated": dt.datetime.now(dt.timezone(dt.timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
-            "public_url": public_url(), "items": items}
+            "public_url": public_url(),
+            "stats": {"records": total_rows, "days": len(all_dates), "items": len(items)},
+            "items": items}
 
 
 def cmd_web_export(args):
@@ -529,7 +591,7 @@ def fetch_item_price(item, model):
         log(f"✗ {item['name']}: {e}")
         return {"name": item["name"], "url": url, "ok": False, "method": "error"}
     price, method = extract_price_rules(page)
-    if price is None and model.available():
+    if price is None and model and model.available():
         price = model.extract_price(item["name"], page)
         method = "小模型识别"
     if price is None:
@@ -542,49 +604,110 @@ def cmd_run(args):
     cfg = load_config()
     os.makedirs(LOGS_DIR, exist_ok=True)
     hist = read_history()
-    model = ModelEngine(cfg["model"])
-    model.load()
+    model = None  # 小模型按需加载：仅当需要识别详情页或写摘要时
 
     today = dt.date.today().isoformat()
     now_t = dt.datetime.now().strftime("%H:%M:%S")
-    rows, csv_rows = [], []
-    for i, item in enumerate(cfg["items"], 1):
-        log(f"({i}/{len(cfg['items'])}) {item['name']}")
-        r = fetch_item_price(item, model)
-        prev_entries = [p for d, p in hist.get(item["name"], []) if d < today]
+
+    # 1) 按品类分组：每个品类只抓一次列表页，即可拿到该品类全部监控型号的参考报价
+    groups, customs = {}, []
+    for it in cfg["items"]:
+        s = slug_of(it["url"])
+        if s:
+            groups.setdefault(s, []).append(it)
+        else:
+            customs.append(it)
+    list_prices = {}
+    for s in groups:
+        try:
+            flat = re.sub(r"\s+", " ", fetch_url(f"https://detail.zol.com.cn/{s}/"))
+            pairs = LIST_RE.findall(flat)
+            for name, path, pr in pairs:
+                p = _num(pr)
+                if p:
+                    list_prices.setdefault(path, (name, p))
+            log(f"列表页[{s}]: {len(pairs)} 条")
+        except Exception as e:
+            log(f"✗ 列表页[{s}] 抓取失败: {e}")
+        time.sleep(1.2)
+
+    # 2) 逐个商品取价：列表页命中直接用；未命中的与自定义商品走详情页
+    rows, detail_items = [], []
+    for item in cfg["items"]:
+        hit = list_prices.get(item_path(item["url"]))
+        if hit:
+            rows.append({"name": item["name"], "url": item["url"], "ok": True,
+                         "price": hit[1], "method": "品类列表"})
+        else:
+            detail_items.append(item)
+    log(f"列表页命中 {len(rows)} 款，需详情页 {len(detail_items)} 款")
+    if detail_items:
+        model = ModelEngine(cfg["model"])
+        model.load()
+        for item in detail_items:
+            rows.append(fetch_item_price(item, model))
+
+    # 3) 与历史比对并写库
+    csv_rows = []
+    for r in rows:
+        prev_entries = [p for d, p, _t in hist.get(r["name"], []) if d < today]
         prev = prev_entries[-1] if prev_entries else None
+        r["prev"] = prev
+        r["pct"] = (r["price"] - prev) / prev * 100 if (r["ok"] and prev) else None
         if r["ok"]:
-            pct = (r["price"] - prev) / prev * 100 if prev else None
-            log(f"  → ¥{r['price']:,.0f} ({r['method']})" +
-                (f"，较上次 {pct:+.1f}%" if pct is not None else "，首次记录"))
             csv_rows.append({"date": today, "time": now_t, "name": r["name"],
                              "price": r["price"], "method": r["method"], "url": r["url"]})
-            r["pct"] = pct
-            r["prev"] = prev
-        else:
-            r["pct"], r["prev"] = None, prev
-        rows.append(r)
-        time.sleep(1.0)
-
+    fails = [r for r in rows if not r["ok"]]
+    for r in fails[:5]:
+        log(f"✗ {r['name']}")
+    if len(fails) > 5:
+        log(f"…另有 {len(fails) - 5} 款抓取失败")
     if csv_rows:
         append_price_rows(csv_rows)
     hist = read_history()
     for r in rows:
         r["history"] = hist.get(r["name"], [])
 
+    # 4) 京东渠道：轮换抓一批详情页上的京东价（仅CPU/显卡/主板带此模块，借道ZOL避开京东反爬）
+    zol_items = [it for it in cfg["items"] if slug_of(it["url"]) in JD_CATS]
+    if zol_items:
+        hour_idx = dt.datetime.now().hour
+        block = [zol_items[(hour_idx * JD_PER_RUN + i) % len(zol_items)]
+                 for i in range(min(JD_PER_RUN, len(zol_items)))]
+        jd_rows, got = [], 0
+        for it in block:
+            try:
+                flat = re.sub(r"\s+", " ", fetch_url(it["url"]))
+                m = JD_RE.search(flat)
+                if m:
+                    p = _num(m.group(1))
+                    if p:
+                        jd_rows.append({"date": today, "time": now_t,
+                                        "name": it["name"], "price": p})
+                        got += 1
+            except Exception:
+                pass
+            time.sleep(0.5)
+        log(f"京东渠道: 本轮 {got}/{len(block)} 款")
+        if jd_rows:
+            append_jd_rows(jd_rows)
+
     summary = None
     tracked = [r for r in rows if r["ok"]]
     changed = [r for r in tracked if r["pct"] is not None and abs(r["pct"]) > 0.05]
     first_seen = [r for r in tracked if r["pct"] is None]
     if cfg["model"].get("summary", True):
-        if changed and model.available():
-            summary = model.summarize(changed, len(tracked))
-        elif first_seen:
-            names = "、".join(r["name"] for r in first_seen[:3])
-            more = "等" if len(first_seen) > 3 else ""
-            summary = f"今日新增跟踪 {len(first_seen)} 个商品（{names}{more}），已记录首次价格。"
-        elif tracked:
-            summary = f"今日 {len(tracked)} 个配件价格总体平稳，无明显涨跌。"
+        if changed:
+            if model is None:
+                model = ModelEngine(cfg["model"])
+                model.load()
+            if model.available():
+                summary = model.summarize(changed, len(tracked))
+        if summary is None and first_seen:
+            summary = (f"开始跟踪 {len(first_seen)} 款配件，已记录首日价格；"
+                       f"另有 {len(tracked) - len(first_seen)} 款续记。")
+        elif summary is None and tracked:
+            summary = f"今日 {len(tracked)} 款配件价格总体平稳，无明显涨跌。"
         if summary:
             log(f"摘要: {summary}")
 
@@ -596,14 +719,44 @@ def cmd_run(args):
                               "ok": r["ok"]} for r in rows]},
                   f, ensure_ascii=False, indent=2)
 
-    build_report(rows, summary)
+    report_rows = sorted(rows, key=lambda r: abs(r.get("pct") or 0), reverse=True)[:60]
+    build_report(report_rows, summary)
     try:
         cmd_web_export(args)
     except Exception as e:
         log(f"网页数据导出失败: {e}")
-    ok_n = sum(1 for r in rows if r["ok"])
-    log(f"完成: {ok_n}/{len(rows)} 个商品更新成功，报告已生成 data/report.html")
+    ok_n = len(tracked)
+    log(f"完成: {ok_n}/{len(rows)} 款更新成功，报告已生成 data/report.html")
     return 0 if ok_n else 1
+
+
+def cmd_refresh_catalog(args):
+    """从 ZOL 十大品类列表页重建全量监控目录（保留自定义商品；同名历史沿用旧名称）。"""
+    cfg = load_config()
+    old_by_url = {it["url"]: it for it in cfg["items"]}
+    new_items, seen = [], set()
+    for slug, label in CATEGORIES:
+        try:
+            flat = re.sub(r"\s+", " ", fetch_url(f"https://detail.zol.com.cn/{slug}/"))
+        except Exception as e:
+            log(f"✗ {label}: {e}")
+            continue
+        n = 0
+        for name, path, _pr in LIST_RE.findall(flat):
+            url = "https://detail.zol.com.cn" + path
+            if url in seen:
+                continue
+            seen.add(url)
+            old = old_by_url.get(url)
+            new_items.append({"name": (old or {}).get("name") or name, "url": url})
+            n += 1
+        log(f"✓ {label}: {n} 款")
+        time.sleep(1.2)
+    customs = [it for it in cfg["items"] if slug_of(it["url"]) is None]
+    cfg["items"] = customs + new_items
+    save_config(cfg)
+    log(f"目录已刷新: ZOL 十大品类 {len(new_items)} 款 + 自定义 {len(customs)} 个，共 {len(cfg['items'])} 条监控")
+    return 0
 
 
 def cmd_list(args):
@@ -751,6 +904,7 @@ def main():
     p_test.add_argument("url")
     sub.add_parser("model-setup", help="下载本地小模型")
     sub.add_parser("report", help="根据已有数据重新生成报告")
+    sub.add_parser("refresh-catalog", help="从ZOL十大品类重建全量监控目录")
     sub.add_parser("web-export", help="导出网页看板数据(web/data.json)")
     p_serve = sub.add_parser("serve", help="启动本机网页看板服务")
     p_serve.add_argument("--port", type=int, default=None)
@@ -761,6 +915,7 @@ def main():
     os.makedirs(DATA_DIR, exist_ok=True)
     return {"run": cmd_run, "list": cmd_list, "add": cmd_add, "remove": cmd_remove,
             "test": cmd_test, "model-setup": cmd_model_setup, "report": cmd_report,
+            "refresh-catalog": cmd_refresh_catalog,
             "web-export": cmd_web_export, "serve": cmd_serve}[cmd](args)
 
 
