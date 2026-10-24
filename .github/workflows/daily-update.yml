@@ -17,7 +17,7 @@ concurrency:
 jobs:
   update-and-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     permissions:
       contents: write
       pages: write
@@ -47,20 +47,22 @@ jobs:
       - name: 更新价格（ZOL参考报价 + 京东渠道轮换）
         run: python tracker.py run
 
-      - name: 回填30天历史快照价（每日/推送时）
+      - name: 回填历史快照+估算（每日/推送时）
         if: github.event_name != 'schedule' || github.event.schedule == '0 1 * * *'
         run: python tracker.py backfill || true
 
-      - name: 京东渠道全量补扫（每日/推送时）
+      - name: 渠道全量扫（每日/推送时：京东+商家报价）
         if: github.event_name != 'schedule' || github.event.schedule == '0 1 * * *'
-        run: python tracker.py jd-sweep || true
+        run: python tracker.py channel-sweep || true
 
-      - name: 读全网访问计数写入 visit.json
+      - name: 读全网计数写入 visit.json
         run: |
           V=$(curl -sf -m 20 "https://abacus.jasoncameron.dev/get/pc-price-tracker/sgbd0-visits" \
               | python3 -c "import json,sys;print(json.load(sys.stdin)['value'])" 2>/dev/null || echo "")
+          U=$(curl -sf -m 20 "https://abacus.jasoncameron.dev/get/pc-price-tracker/sgbd0-users" \
+              | python3 -c "import json,sys;print(json.load(sys.stdin)['value'])" 2>/dev/null || echo "0")
           if [ -n "$V" ] && [ "$V" != "0" ]; then
-            printf '{"count": %s, "updated": "%s UTC"}\n' "$V" "$(date -u +'%Y-%m-%d %H:%M')" > web/visit.json
+            printf '{"count": %s, "users": %s, "updated": "%s UTC"}\n' "$V" "${U:-0}" "$(date -u +'%Y-%m-%d %H:%M')" > web/visit.json
             cat web/visit.json
           else
             echo "计数服务暂时不可用，保留上次数值"
