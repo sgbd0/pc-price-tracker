@@ -576,11 +576,6 @@ def cmd_web_export(args):
     return 0
 
 
-def cmd_serve(args):
-    import webserver
-    return webserver.main(args)
-
-
 # ---------------------------------------------------------------- 核心流程
 
 def fetch_item_price(item, model):
@@ -668,14 +663,117 @@ def write_ai_note(model, tracked):
                 picks.append({"name": match, "reason": reason[:30]})
         picks = picks[:3]
 
-    if not ai_summary and not picks:
+    if not ai_summary and not picks and not cands:
         return
+
+    # 焦点商品：AI 每天选一个"今日主角"展示在网页顶部
+    focus = None
+    if cands:
+        usr3 = ("从下面商品中选一个今天最值得关注的：\n" + "\n".join(cands[:6]) +
+                "\n只输出一行，格式「名称：一句话(20字内，必须含价格)」。")
+        raw3 = _clip_sentence(model.chat(sys_p, usr3, max_tokens=90, temperature=0.5))
+        nm3, sep3, blurb = (raw3.partition("：") if "：" in raw3 else raw3.partition(":"))
+        nm3, blurb = nm3.strip(), blurb.strip()
+        if sep3 and blurb:
+            names = {r["name"] for r in tracked}
+            m3 = next((n for n in names if nm3 and (nm3 in n or n in nm3)), None)
+            if m3:
+                focus = {"name": m3, "blurb": blurb[:40]}
+
     note = {"date": today, "model": "Qwen2.5-3B", "summary": ai_summary, "picks": picks,
+            "focus": focus,
             "generated": dt.datetime.now(dt.timezone(dt.timedelta(hours=8))).strftime("%Y-%m-%d %H:%M")}
     os.makedirs(os.path.dirname(note_path), exist_ok=True)
     with open(note_path, "w", encoding="utf-8") as f:
         json.dump(note, f, ensure_ascii=False, indent=1)
     log(f"AI 观察已写入 web/ai_notes.json（点评{'√' if ai_summary else '×'} 推荐{len(picks)}条）")
+
+
+def cmd_backfill(args):
+    """用 Wayback Machine 近30天的品类页快照回填真实历史价格，并整体重写 prices.csv。
+
+    快照是互联网档案馆抓取的 ZOL 品类列表页存档，价格真实可信；
+    合并后按（商品, 日期, 小时）去重并按时间排序，旧杂乱数据一并清理。
+    """
+    cfg = load_config()
+    name_by_path = {}
+    for it in cfg["items"]:
+        p = item_path(it["url"])
+        if p:
+            name_by_path[p] = it["name"]
+    today = dt.date.today()
+    frm = (today - dt.timedelta(days=30)).strftime("%Y%m%d")
+    to = today.strftime("%Y%m%d")
+
+    backfill = []
+    for slug, label in CATEGORIES:
+        cdx = (f"https://web.archive.org/cdx/search/cdx?url=detail.zol.com.cn/{slug}/"
+               f"&output=json&from={frm}&to={to}&filter=statuscode:200&collapse=timestamp:8&limit=45")
+        try:
+            req = urllib.request.Request(cdx, headers={"User-Agent": UA})
+            with urllib.request.urlopen(req, timeout=45) as r:
+                data = json.loads(r.read().decode("utf-8", "ignore") or "[]")
+        except Exception as e:
+            log(f"✗ 快照索引[{label}]: {e}")
+            continue
+        snaps = [row[1] for row in data[1:]] if len(data) > 1 else []
+        if not snaps:
+            log(f"- {label}: 近30天无快照")
+            continue
+        if len(snaps) > 12:  # 均匀抽12个，控制时长
+            step = len(snaps) / 12.0
+            snaps = [snaps[int(i * step)] for i in range(12)]
+        got, junk = 0, 0
+        for ts in snaps:
+            d = f"{ts[0:4]}-{ts[4:6]}-{ts[6:8]}"
+            hhmm = f"{ts[8:10]}:{ts[10:12]}:00"
+            if d >= today.isoformat():
+                continue  # 当天用实时数据
+            try:
+                req = urllib.request.Request(
+                    f"https://web.archive.org/web/{ts}id_/https://detail.zol.com.cn/{slug}/",
+                    headers={"User-Agent": UA})
+                with urllib.request.urlopen(req, timeout=60) as r:
+                    raw = r.read()
+                flat = re.sub(r"\s+", " ", raw.decode("gbk", "ignore"))
+                if "service.zol.com.cn/checking" in flat[:1000]:
+                    junk += 1
+                    continue
+                for _n, path, pr in LIST_RE.findall(flat):
+                    nm = name_by_path.get(path)
+                    p = _num(pr)
+                    if nm and p:
+                        backfill.append({"date": d, "time": hhmm, "name": nm,
+                                         "price": p, "method": "wayback快照",
+                                         "url": "https://detail.zol.com.cn" + path})
+                        got += 1
+            except Exception as e:
+                log(f"  快照[{label}] {d} 失败: {e}")
+            time.sleep(1.2)
+        log(f"{'✓' if got else '-'} {label}: {len(snaps)}个快照({junk}个无效), 采到 {got} 条真实历史价")
+
+    # 合并现有数据 → 按(商品,日期,小时)去重 → 按时间重写
+    existing = []
+    if os.path.exists(PRICES_CSV):
+        with open(PRICES_CSV, "r", encoding="utf-8-sig", newline="") as f:
+            existing = [dict(r) for r in csv.DictReader(f)]
+    merged = {}
+    for r in existing + backfill:
+        try:
+            merged[(r["name"], r["date"], r["time"][:2])] = r
+        except KeyError:
+            continue
+    rows_out = sorted(merged.values(), key=lambda r: (r["date"], r["time"], r["name"]))
+    os.makedirs(DATA_DIR, exist_ok=True)
+    with open(PRICES_CSV, "w", encoding="utf-8-sig", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["date", "time", "name", "price", "method", "url"])
+        for r in rows_out:
+            w.writerow([r["date"], r["time"], r["name"], r["price"], r["method"], r["url"]])
+    dates = sorted({r["date"] for r in rows_out})
+    log(f"回填完成: 新增 {len(backfill)} 条真实历史价，库内共 {len(rows_out)} 条，"
+        f"覆盖 {dates[0]} ~ {dates[-1]} 共 {len(dates)} 天")
+    return 0
 
 
 def cmd_run(args):
@@ -798,16 +896,6 @@ def cmd_run(args):
     except Exception as e:
         log(f"AI 观察生成失败: {e}")
 
-    with open(LATEST_JSON, "w", encoding="utf-8") as f:
-        json.dump({"updated": dt.datetime.now().isoformat(timespec="seconds"),
-                   "items": [{"name": r["name"], "url": r["url"],
-                              "price": r.get("price"), "prev": r.get("prev"),
-                              "pct": round(r["pct"], 2) if r.get("pct") is not None else None,
-                              "ok": r["ok"]} for r in rows]},
-                  f, ensure_ascii=False, indent=2)
-
-    report_rows = sorted(rows, key=lambda r: abs(r.get("pct") or 0), reverse=True)[:60]
-    build_report(report_rows, summary)
     try:
         cmd_web_export(args)
     except Exception as e:
@@ -993,17 +1081,15 @@ def main():
     sub.add_parser("report", help="根据已有数据重新生成报告")
     sub.add_parser("refresh-catalog", help="从ZOL十大品类重建全量监控目录")
     sub.add_parser("web-export", help="导出网页看板数据(web/data.json)")
-    p_serve = sub.add_parser("serve", help="启动本机网页看板服务")
-    p_serve.add_argument("--port", type=int, default=None)
-    p_serve.add_argument("--bind", default=None)
+    sub.add_parser("backfill", help="用Wayback快照回填近30天真实历史价")
 
     args = parser.parse_args()
     cmd = args.cmd or "run"
     os.makedirs(DATA_DIR, exist_ok=True)
     return {"run": cmd_run, "list": cmd_list, "add": cmd_add, "remove": cmd_remove,
             "test": cmd_test, "model-setup": cmd_model_setup, "report": cmd_report,
-            "refresh-catalog": cmd_refresh_catalog,
-            "web-export": cmd_web_export, "serve": cmd_serve}[cmd](args)
+            "refresh-catalog": cmd_refresh_catalog, "backfill": cmd_backfill,
+            "web-export": cmd_web_export}[cmd](args)
 
 
 if __name__ == "__main__":
