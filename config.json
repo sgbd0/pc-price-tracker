@@ -1,26 +1,302 @@
 {
   "model": {
     "enabled": true,
-    "file": "models\\qwen2.5-0.5b-instruct-q4_k_m.gguf",
+    "file": "models/qwen2.5-3b-instruct-q4_k_m.gguf",
     "context_chars": 2000,
     "summary": true
   },
   "items": [
     {
-      "name": "AMD 锐龙7 9800X3D",
-      "url": "https://detail.zol.com.cn/cpu/index2113342.shtml"
+      "name": "AMD Ryzen 7 5700X",
+      "url": "https://detail.zol.com.cn/cpu/index1403089.shtml"
     },
     {
       "name": "AMD 锐龙5 9600X",
       "url": "https://detail.zol.com.cn/cpu/index2018967.shtml"
     },
     {
-      "name": "技嘉 RTX 5060 Ti GAMING OC 16G",
-      "url": "https://detail.zol.com.cn/vga/index2130983.shtml"
+      "name": "AMD Ryzen 5 5600",
+      "url": "https://detail.zol.com.cn/cpu/index1403088.shtml"
     },
     {
-      "name": "微星 RTX 5060 8G GAMING TRIO OC",
-      "url": "https://detail.zol.com.cn/vga/index2128734.shtml"
+      "name": "AMD 锐龙7 9800X3D",
+      "url": "https://detail.zol.com.cn/cpu/index2113342.shtml"
+    },
+    {
+      "name": "Intel 酷睿 i5 14600KF",
+      "url": "https://detail.zol.com.cn/cpu/index1929615.shtml"
+    },
+    {
+      "name": "Intel 酷睿 i9 14900K",
+      "url": "https://detail.zol.com.cn/cpu/index1805095.shtml"
+    },
+    {
+      "name": "Intel 酷睿 i5 12490F",
+      "url": "https://detail.zol.com.cn/cpu/index1396551.shtml"
+    },
+    {
+      "name": "Intel 酷睿 i7 14700K",
+      "url": "https://detail.zol.com.cn/cpu/index1814492.shtml"
+    },
+    {
+      "name": "Intel 酷睿 Ultra 9 285K",
+      "url": "https://detail.zol.com.cn/cpu/index2110066.shtml"
+    },
+    {
+      "name": "AMD Ryzen 7 7800X3D",
+      "url": "https://detail.zol.com.cn/cpu/index1440585.shtml"
+    },
+    {
+      "name": "AMD A4-7300（盒）",
+      "url": "https://detail.zol.com.cn/cpu/index391195.shtml"
+    },
+    {
+      "name": "AMD 速龙II X4 760K（盒）",
+      "url": "https://detail.zol.com.cn/cpu/index359934.shtml"
+    },
+    {
+      "name": "Intel 酷睿i5 4590",
+      "url": "https://detail.zol.com.cn/cpu/index381245.shtml"
+    },
+    {
+      "name": "AMD A10-7800（盒）",
+      "url": "https://detail.zol.com.cn/cpu/index391202.shtml"
+    },
+    {
+      "name": "AMD FX-6350（盒）",
+      "url": "https://detail.zol.com.cn/cpu/index353898.shtml"
+    },
+    {
+      "name": "AMD A4-3400（盒）",
+      "url": "https://detail.zol.com.cn/cpu/index288554.shtml"
+    },
+    {
+      "name": "AMD A6-3670K（盒）",
+      "url": "https://detail.zol.com.cn/cpu/index300683.shtml"
+    },
+    {
+      "name": "Intel 酷睿i5 4430（散）",
+      "url": "https://detail.zol.com.cn/cpu/index356622.shtml"
+    },
+    {
+      "name": "AMD A10-6700",
+      "url": "https://detail.zol.com.cn/cpu/index388456.shtml"
+    },
+    {
+      "name": "AMD A4-6300（盒）",
+      "url": "https://detail.zol.com.cn/cpu/index384043.shtml"
+    },
+    {
+      "name": "Intel 酷睿 Ultra 7 270K Plus",
+      "url": "https://detail.zol.com.cn/cpu/index2162063.shtml"
+    },
+    {
+      "name": "AMD Ryzen 7 9700X",
+      "url": "https://detail.zol.com.cn/cpu/index2018966.shtml"
+    },
+    {
+      "name": "Intel 酷睿 i5 13400F",
+      "url": "https://detail.zol.com.cn/cpu/index1440555.shtml"
+    },
+    {
+      "name": "AMD Ryzen 5 5600GT",
+      "url": "https://detail.zol.com.cn/cpu/index1980887.shtml"
+    },
+    {
+      "name": "AMD Ryzen 5 5500",
+      "url": "https://detail.zol.com.cn/cpu/index1403086.shtml"
+    },
+    {
+      "name": "Intel 酷睿 i3 13100F",
+      "url": "https://detail.zol.com.cn/cpu/index1440455.shtml"
+    },
+    {
+      "name": "AMD 锐龙 9 9950X3D2",
+      "url": "https://detail.zol.com.cn/cpu/index2167284.shtml"
+    },
+    {
+      "name": "AMD Ryzen 5 9600",
+      "url": "https://detail.zol.com.cn/cpu/index2179829.shtml"
+    },
+    {
+      "name": "AMD Ryzen 7 7700X3D",
+      "url": "https://detail.zol.com.cn/cpu/index2179827.shtml"
+    },
+    {
+      "name": "AMD Ryzen 9 5900XT",
+      "url": "https://detail.zol.com.cn/cpu/index2179823.shtml"
+    },
+    {
+      "name": "AMD Ryzen 7 5800XT",
+      "url": "https://detail.zol.com.cn/cpu/index2179820.shtml"
+    },
+    {
+      "name": "Intel 酷睿 Ultra 5 250KF Plus",
+      "url": "https://detail.zol.com.cn/cpu/index2179677.shtml"
+    },
+    {
+      "name": "Intel 酷睿 i7 14790F",
+      "url": "https://detail.zol.com.cn/cpu/index2179620.shtml"
+    },
+    {
+      "name": "AMD Ryzen 5 5500X3D",
+      "url": "https://detail.zol.com.cn/cpu/index2162065.shtml"
+    },
+    {
+      "name": "Intel 酷睿 Ultra 5 250K Plus",
+      "url": "https://detail.zol.com.cn/cpu/index2162061.shtml"
+    },
+    {
+      "name": "华硕TUF GAMING B760M-PLUS D4重炮手",
+      "url": "https://detail.zol.com.cn/motherboard/index1440076.shtml"
+    },
+    {
+      "name": "技嘉 B650M GAMING WIFI",
+      "url": "https://detail.zol.com.cn/motherboard/index2106519.shtml"
+    },
+    {
+      "name": "七彩虹iGame X870E VULCAN W OC V14",
+      "url": "https://detail.zol.com.cn/motherboard/index2176809.shtml"
+    },
+    {
+      "name": "微星A520M-A PRO",
+      "url": "https://detail.zol.com.cn/motherboard/index1336519.shtml"
+    },
+    {
+      "name": "铭瑄 MS-终结者 B760M D4 WIFI",
+      "url": "https://detail.zol.com.cn/motherboard/index1441184.shtml"
+    },
+    {
+      "name": "华南金牌X99-F8DPLUS",
+      "url": "https://detail.zol.com.cn/motherboard/index1897144.shtml"
+    },
+    {
+      "name": "华硕PRIME B660M-K D4",
+      "url": "https://detail.zol.com.cn/motherboard/index1396983.shtml"
+    },
+    {
+      "name": "华硕ROG STRIX Z890-A GAMING WIFI S吹雪",
+      "url": "https://detail.zol.com.cn/motherboard/index2110130.shtml"
+    },
+    {
+      "name": "微星B450M MORTAR MAX",
+      "url": "https://detail.zol.com.cn/motherboard/index1288908.shtml"
+    },
+    {
+      "name": "华硕P8B75-V",
+      "url": "https://detail.zol.com.cn/motherboard/index318872.shtml"
+    },
+    {
+      "name": "华硕SABERTOOTH X99",
+      "url": "https://detail.zol.com.cn/motherboard/index398194.shtml"
+    },
+    {
+      "name": "华硕Z97-E",
+      "url": "https://detail.zol.com.cn/motherboard/index402960.shtml"
+    },
+    {
+      "name": "华硕B85M-K PLUS",
+      "url": "https://detail.zol.com.cn/motherboard/index398202.shtml"
+    },
+    {
+      "name": "七彩虹战斧C.B85AK 魔音版 V21A",
+      "url": "https://detail.zol.com.cn/motherboard/index398947.shtml"
+    },
+    {
+      "name": "七彩虹战斧C.A88M-K魔音版 V16A",
+      "url": "https://detail.zol.com.cn/motherboard/index398915.shtml"
+    },
+    {
+      "name": "七彩虹战斧C.A78M-K魔音版 V16A",
+      "url": "https://detail.zol.com.cn/motherboard/index398912.shtml"
+    },
+    {
+      "name": "华擎970 Performance",
+      "url": "https://detail.zol.com.cn/motherboard/index398773.shtml"
+    },
+    {
+      "name": "微星970A SLI Krait Edition",
+      "url": "https://detail.zol.com.cn/motherboard/index398685.shtml"
+    },
+    {
+      "name": "铭瑄 MS-H81EL全固版",
+      "url": "https://detail.zol.com.cn/motherboard/index398681.shtml"
+    },
+    {
+      "name": "七彩虹C.B85K 全固态版 V24",
+      "url": "https://detail.zol.com.cn/motherboard/index398659.shtml"
+    },
+    {
+      "name": "微星MPG X870E CARBON WIFI",
+      "url": "https://detail.zol.com.cn/motherboard/index2109000.shtml"
+    },
+    {
+      "name": "华硕ROG STRIX B850-E GAMING WIFI",
+      "url": "https://detail.zol.com.cn/motherboard/index2118270.shtml"
+    },
+    {
+      "name": "微星MAG B850M MORTAR WIFI",
+      "url": "https://detail.zol.com.cn/motherboard/index2124548.shtml"
+    },
+    {
+      "name": "华硕TUF GAMING B550M-PLUS WIFI-GMZR",
+      "url": "https://detail.zol.com.cn/motherboard/index1400235.shtml"
+    },
+    {
+      "name": "华硕PRIME B550M-K ARGB",
+      "url": "https://detail.zol.com.cn/motherboard/index2104537.shtml"
+    },
+    {
+      "name": "技嘉H610M K DDR4",
+      "url": "https://detail.zol.com.cn/motherboard/index2070828.shtml"
+    },
+    {
+      "name": "华硕PRIME H610M-K D4",
+      "url": "https://detail.zol.com.cn/motherboard/index1397600.shtml"
+    },
+    {
+      "name": "技嘉X870E AORUS PRO ICE",
+      "url": "https://detail.zol.com.cn/motherboard/index2108989.shtml"
+    },
+    {
+      "name": "技嘉B850 AORUS ELITE X3D",
+      "url": "https://detail.zol.com.cn/motherboard/index2178092.shtml"
+    },
+    {
+      "name": "技嘉B850 AORUS ELITE-P ICE",
+      "url": "https://detail.zol.com.cn/motherboard/index2177218.shtml"
+    },
+    {
+      "name": "微星MPG X870E CARBON MAX WIFI",
+      "url": "https://detail.zol.com.cn/motherboard/index2170776.shtml"
+    },
+    {
+      "name": "微星MAG B850M MORTAR MAX WIFI",
+      "url": "https://detail.zol.com.cn/motherboard/index2169157.shtml"
+    },
+    {
+      "name": "七彩虹BATTLE-AX B860M-PLUS S WIFI7 V20",
+      "url": "https://detail.zol.com.cn/motherboard/index2164623.shtml"
+    },
+    {
+      "name": "七彩虹CVN B860I GAMING FROZEN V20",
+      "url": "https://detail.zol.com.cn/motherboard/index2164622.shtml"
+    },
+    {
+      "name": "七彩虹iGame B860M ULTRA V20",
+      "url": "https://detail.zol.com.cn/motherboard/index2164621.shtml"
+    },
+    {
+      "name": "七彩虹BATTLE-AX B860M-P WIFI V20",
+      "url": "https://detail.zol.com.cn/motherboard/index2164620.shtml"
+    },
+    {
+      "name": "七彩虹BATTLE-AX B860M-E WIFI V20",
+      "url": "https://detail.zol.com.cn/motherboard/index2164619.shtml"
+    },
+    {
+      "name": "金士顿叛逆者Renegade 32GB(16G*2) DDR5 6000 灯条RGB白",
+      "url": "https://detail.zol.com.cn/memory/index1948453.shtml"
     },
     {
       "name": "金百达银爵 16GB DDR4 3200",
@@ -31,20 +307,1228 @@
       "url": "https://detail.zol.com.cn/memory/index1629095.shtml"
     },
     {
+      "name": "金百达黑刃 DDR5 6800 64GB(32GBx2)",
+      "url": "https://detail.zol.com.cn/memory/index1985006.shtml"
+    },
+    {
+      "name": "英睿达16GB DDR5 5600 笔记本内存条",
+      "url": "https://detail.zol.com.cn/memory/index1708969.shtml"
+    },
+    {
+      "name": "芝奇幻锋戟 32GB（2×16GB）DDR5 6000",
+      "url": "https://detail.zol.com.cn/memory/index1395770.shtml"
+    },
+    {
+      "name": "金士顿HyperX Savage 8GB DDR4 2400（HX424C12SB/8）",
+      "url": "https://detail.zol.com.cn/memory/index1109479.shtml"
+    },
+    {
+      "name": "金百达银爵 32GB（2×16GB）DDR5 6000",
+      "url": "https://detail.zol.com.cn/memory/index1440043.shtml"
+    },
+    {
+      "name": "金百达银爵 32GB（2×16GB）DDR4 3600",
+      "url": "https://detail.zol.com.cn/memory/index1465801.shtml"
+    },
+    {
+      "name": "金士顿骇客神条FURY 16GB DDR4 3200（HX432C18FB/16-SP）",
+      "url": "https://detail.zol.com.cn/memory/index1270269.shtml"
+    },
+    {
+      "name": "金士顿骇客神条FURY 16GB DDR4 2400（4GBx4）",
+      "url": "https://detail.zol.com.cn/memory/index1115604.shtml"
+    },
+    {
+      "name": "海盗船16GB DDR3 1600（CMD16GX3M2A1600C9）",
+      "url": "https://detail.zol.com.cn/memory/index375656.shtml"
+    },
+    {
+      "name": "金士顿Predator 16GB DDR4 2400（HX424C12PBK4/16）",
+      "url": "https://detail.zol.com.cn/memory/index390389.shtml"
+    },
+    {
+      "name": "宇瞻黑豹玩家 16GB DDR3 1600",
+      "url": "https://detail.zol.com.cn/memory/index347353.shtml"
+    },
+    {
+      "name": "芝奇Z 16GB DDR4 3000（8GB×2条）（F4-3000C15D-16GTZB）",
+      "url": "https://detail.zol.com.cn/memory/index1109472.shtml"
+    },
+    {
+      "name": "芝奇V 16GB DDR4 2400（8GB×2条）（F4-2400C15D-16GVR）",
+      "url": "https://detail.zol.com.cn/memory/index1109411.shtml"
+    },
+    {
+      "name": "金士顿HyperX Savage 16GB DDR4 2400（8GBx2）（HX424C12SBK2/16）",
+      "url": "https://detail.zol.com.cn/memory/index1102829.shtml"
+    },
+    {
+      "name": "金士顿Predator 16GB DDR4 2666（HX426C13PBK4/16）",
+      "url": "https://detail.zol.com.cn/memory/index390390.shtml"
+    },
+    {
+      "name": "芝奇TridentZ DDR4 3000（8GBx2）（F4-3000C15D-16GTZB）",
+      "url": "https://detail.zol.com.cn/memory/index1109908.shtml"
+    },
+    {
+      "name": "威刚游戏威龙 16GB DDR3 2400",
+      "url": "https://detail.zol.com.cn/memory/index344297.shtml"
+    },
+    {
+      "name": "玖合异刃灯条 32GB(16Gx2) DDR5 8000",
+      "url": "https://detail.zol.com.cn/memory/index2170730.shtml"
+    },
+    {
+      "name": "金士顿FURY Beast 64GB（2×32GB）DDR5 6000（KF560C40BBK2-64）",
+      "url": "https://detail.zol.com.cn/memory/index1629096.shtml"
+    },
+    {
+      "name": "雷克沙雷神之锤 DDR5 6000 32GB(16GBx2) CL30 黑色",
+      "url": "https://detail.zol.com.cn/memory/index2115744.shtml"
+    },
+    {
+      "name": "威刚XPG 威龙 D35 DDR4 3200 32GB(16GBx2) 黑色",
+      "url": "https://detail.zol.com.cn/memory/index2154852.shtml"
+    },
+    {
+      "name": "金百达刃RGB DDR4 3600 32GB(16GB×2)海力士C16白刃",
+      "url": "https://detail.zol.com.cn/memory/index2099496.shtml"
+    },
+    {
+      "name": "阿斯加特金伦加 TUF联名款 32GB（2×16GB） DDR4 3600",
+      "url": "https://detail.zol.com.cn/memory/index1610774.shtml"
+    },
+    {
+      "name": "七彩虹天蝎座 DDR4 3200 16GB（2×8GB）",
+      "url": "https://detail.zol.com.cn/memory/index2108963.shtml"
+    },
+    {
+      "name": "金邦天箭 32GB(16G*2) DDR4 3600 黑色C18",
+      "url": "https://detail.zol.com.cn/memory/index2173513.shtml"
+    },
+    {
+      "name": "爱国者承影 16GB DDR4 3200",
+      "url": "https://detail.zol.com.cn/memory/index2176230.shtml"
+    },
+    {
+      "name": "威刚XPG 威龙 D35 DDR4 3200 16GB(8GBx2) 白色",
+      "url": "https://detail.zol.com.cn/memory/index2154855.shtml"
+    },
+    {
+      "name": "铭瑄 瑷雪 32GB（16GB*2） DDR4 3200 ",
+      "url": "https://detail.zol.com.cn/memory/index2181481.shtml"
+    },
+    {
+      "name": "铭瑄 瑷雪 16GB DDR4 3200",
+      "url": "https://detail.zol.com.cn/memory/index2181480.shtml"
+    },
+    {
+      "name": "铭瑄 瑷雪 16GB（8GB*2） DDR4 3200",
+      "url": "https://detail.zol.com.cn/memory/index2181479.shtml"
+    },
+    {
+      "name": "铭瑄 瑷雪 8GB DDR4 3200",
+      "url": "https://detail.zol.com.cn/memory/index2181478.shtml"
+    },
+    {
+      "name": "铭瑄 瑷雪 32GB（16GB*2） DDR4 3600",
+      "url": "https://detail.zol.com.cn/memory/index2181477.shtml"
+    },
+    {
+      "name": "铭瑄 瑷雪 16GB DDR4 3600 ",
+      "url": "https://detail.zol.com.cn/memory/index2181476.shtml"
+    },
+    {
+      "name": "铭瑄 瑷雪 16GB（8GB*2） DDR4 3600 ",
+      "url": "https://detail.zol.com.cn/memory/index2181475.shtml"
+    },
+    {
+      "name": "铭瑄 瑷雪 8GB DDR4 3600",
+      "url": "https://detail.zol.com.cn/memory/index2181474.shtml"
+    },
+    {
+      "name": "爱国者承影 32GB DDR4 3600",
+      "url": "https://detail.zol.com.cn/memory/index2181473.shtml"
+    },
+    {
+      "name": "爱国者承影 32GB（2*16GB） DDR4 3600",
+      "url": "https://detail.zol.com.cn/memory/index2181472.shtml"
+    },
+    {
+      "name": "NVIDIA RTX 5090",
+      "url": "https://detail.zol.com.cn/vga/index2118113.shtml"
+    },
+    {
+      "name": "影驰GeForce RTX 5080 金属大师白金版",
+      "url": "https://detail.zol.com.cn/vga/index2119814.shtml"
+    },
+    {
+      "name": "技嘉 RTX 5060 Ti GAMING OC 16G",
+      "url": "https://detail.zol.com.cn/vga/index2130983.shtml"
+    },
+    {
+      "name": "微星 RTX 5060 8G GAMING TRIO OC",
+      "url": "https://detail.zol.com.cn/vga/index2128734.shtml"
+    },
+    {
+      "name": "七彩虹iGame GeForce RTX 4060 Ultra W DUO 8GB",
+      "url": "https://detail.zol.com.cn/vga/index1794057.shtml"
+    },
+    {
+      "name": "华硕TUF-RTX5070TI-O16G",
+      "url": "https://detail.zol.com.cn/vga/index2121275.shtml"
+    },
+    {
+      "name": "万丽雪狐GeForce RTX 5070 OC 12GB GDDR7",
+      "url": "https://detail.zol.com.cn/vga/index2140372.shtml"
+    },
+    {
+      "name": "蓝戟Intel Arc A380 Photon 6G OC",
+      "url": "https://detail.zol.com.cn/vga/index1414380.shtml"
+    },
+    {
+      "name": "AMD Radeon RX 5700 XT显卡",
+      "url": "https://detail.zol.com.cn/vga/index1279345.shtml"
+    },
+    {
+      "name": "瀚铠Radeon RX 9070 XT 超合金PRO",
+      "url": "https://detail.zol.com.cn/vga/index2141540.shtml"
+    },
+    {
+      "name": "华硕GTX 980Ti-6GD5",
+      "url": "https://detail.zol.com.cn/vga/index402453.shtml"
+    },
+    {
+      "name": "铭瑄 GTX 970风系列4G",
+      "url": "https://detail.zol.com.cn/vga/index389593.shtml"
+    },
+    {
+      "name": "迪兰R9 370 酷能 2G 1024SP",
+      "url": "https://detail.zol.com.cn/vga/index403209.shtml"
+    },
+    {
+      "name": "华硕TURBO-GTX 960-OC-2GD5",
+      "url": "https://detail.zol.com.cn/vga/index405162.shtml"
+    },
+    {
+      "name": "小影霸GT730后羿版",
+      "url": "https://detail.zol.com.cn/vga/index394050.shtml"
+    },
+    {
+      "name": "蓝宝石R9 380 4G D5 超白金 OC",
+      "url": "https://detail.zol.com.cn/vga/index403227.shtml"
+    },
+    {
+      "name": "蓝宝石R9 380 2G D5 限量版 OC",
+      "url": "https://detail.zol.com.cn/vga/index403226.shtml"
+    },
+    {
+      "name": "蓝宝石R9 380 2G D5 超白金 OC",
+      "url": "https://detail.zol.com.cn/vga/index403225.shtml"
+    },
+    {
+      "name": "蓝宝石R9 380 2G D5 超白金 ITX",
+      "url": "https://detail.zol.com.cn/vga/index403223.shtml"
+    },
+    {
+      "name": "技嘉GeForce RTX 5090 D WINDFORCE 32G",
+      "url": "https://detail.zol.com.cn/vga/index2119967.shtml"
+    },
+    {
+      "name": "华硕PRIME RTX5080 O16G",
+      "url": "https://detail.zol.com.cn/vga/index2119968.shtml"
+    },
+    {
+      "name": "华硕TUF GAMING RTX5080 O16G GAMING",
+      "url": "https://detail.zol.com.cn/vga/index2119971.shtml"
+    },
+    {
+      "name": "蓝宝石PULSE 脉动 RX 9070 XT 16G D6",
+      "url": "https://detail.zol.com.cn/vga/index2126097.shtml"
+    },
+    {
+      "name": "蓝宝石RX 7600 8G 白金",
+      "url": "https://detail.zol.com.cn/vga/index1653094.shtml"
+    },
+    {
+      "name": "七彩虹战斧 GeForce RTX 4060 Ti 豪华版 OC 16GB",
+      "url": "https://detail.zol.com.cn/vga/index1838305.shtml"
+    },
+    {
+      "name": "蓝宝石RX 6750 GRE 12G D6 极地版",
+      "url": "https://detail.zol.com.cn/vga/index1929842.shtml"
+    },
+    {
+      "name": "蓝宝石AMD Radeon RX 7650 GRE 8G 黑钻版",
+      "url": "https://detail.zol.com.cn/vga/index2121059.shtml"
+    },
+    {
+      "name": "华硕PH-GTX1650S-O4G",
+      "url": "https://detail.zol.com.cn/vga/index1301542.shtml"
+    },
+    {
+      "name": "万丽30周年限定 GeForce RTX 5080 OC 16G GDDR7",
+      "url": "https://detail.zol.com.cn/vga/index2178098.shtml"
+    },
+    {
+      "name": "万丽UF GeForce RTX 5060 Ti OC 8GB GDDR7",
+      "url": "https://detail.zol.com.cn/vga/index2178097.shtml"
+    },
+    {
+      "name": "技嘉AORUS GeForce RTX 5060 ARI 8G",
+      "url": "https://detail.zol.com.cn/vga/index2177219.shtml"
+    },
+    {
+      "name": "映众GeForce RTX 5080 超级冰龙 V2",
+      "url": "https://detail.zol.com.cn/vga/index2170264.shtml"
+    },
+    {
+      "name": "NVIDIA RTX Pro6000D 84GB 服务器版",
+      "url": "https://detail.zol.com.cn/vga/index2167305.shtml"
+    },
+    {
+      "name": "砺算科技LX 7G100 12G 创始版",
+      "url": "https://detail.zol.com.cn/vga/index2167063.shtml"
+    },
+    {
+      "name": "映众GeForce RTX 5070 X2 曜夜 OC 12G",
+      "url": "https://detail.zol.com.cn/vga/index2166624.shtml"
+    },
+    {
+      "name": "映众GeForce RTX 5070 X3 12GB 雪域冰龙",
+      "url": "https://detail.zol.com.cn/vga/index2166623.shtml"
+    },
+    {
+      "name": "映众GeForce RTX 5070 X3 12GB 超级冰龙",
+      "url": "https://detail.zol.com.cn/vga/index2166622.shtml"
+    },
+    {
+      "name": "映众GeForce RTX 5070 X3 曜夜 OC 12G",
+      "url": "https://detail.zol.com.cn/vga/index2166621.shtml"
+    },
+    {
       "name": "致态 TiPlus7100 1TB",
       "url": "https://detail.zol.com.cn/solid_state_drive/index1432187.shtml"
+    },
+    {
+      "name": "梵想S500 PRO（2TB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index1448156.shtml"
     },
     {
       "name": "西部数据 SN7100 1TB",
       "url": "https://detail.zol.com.cn/solid_state_drive/index2122758.shtml"
     },
     {
-      "name": "技嘉 B650M GAMING WIFI",
-      "url": "https://detail.zol.com.cn/motherboard/index2106519.shtml"
+      "name": "三星990 PRO NVMe M.2（2TB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index1425886.shtml"
+    },
+    {
+      "name": "金士顿NV3 1TB",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2104247.shtml"
+    },
+    {
+      "name": "致态TiPlus7100s（1TB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2147374.shtml"
+    },
+    {
+      "name": "致态TiPro9000（1TB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2117180.shtml"
+    },
+    {
+      "name": "致态TiPlus7100（512GB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index1432186.shtml"
+    },
+    {
+      "name": "京东京造JZ-SSD1T-3（1TB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index1358245.shtml"
+    },
+    {
+      "name": "金胜维MultiCore（1TB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index361148.shtml"
+    },
+    {
+      "name": "创见StoreJet500 TS512GSJM500（512GB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index396480.shtml"
+    },
+    {
+      "name": "创见StoreJet500 TS256GSJM500（256GB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index396479.shtml"
+    },
+    {
+      "name": "光威STK480GS3-S7（480GB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index391817.shtml"
+    },
+    {
+      "name": "Intel DC S3700系列（400GB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index364646.shtml"
+    },
+    {
+      "name": "创见StoreJet500 TS1TSJM500（1TB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index395670.shtml"
+    },
+    {
+      "name": "影驰铠甲战将M.2系列（256GB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index394205.shtml"
+    },
+    {
+      "name": "金速F9系列（512GB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index391451.shtml"
+    },
+    {
+      "name": "创见MTS600系列（512GB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index388914.shtml"
+    },
+    {
+      "name": "致态TiPlus9100（2TB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2168764.shtml"
+    },
+    {
+      "name": "西部数据WD_BLACK SN850X 2TB",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index1427477.shtml"
+    },
+    {
+      "name": "三星9100 PRO 2TB",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2125795.shtml"
+    },
+    {
+      "name": "雷克沙NM790(散热马甲版) 1TB",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2082482.shtml"
+    },
+    {
+      "name": "铭瑄 SD512GBNM300A-2280",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index1990526.shtml"
+    },
+    {
+      "name": "致态TiPlus9100（1TB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2168763.shtml"
+    },
+    {
+      "name": "西部数据BLUE SN550（500GB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index1305219.shtml"
+    },
+    {
+      "name": "三星980 PRO NVMe M.2（1TB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index1308473.shtml"
+    },
+    {
+      "name": "雷克沙NM700（256GB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index1299192.shtml"
+    },
+    {
+      "name": "三星9100 PRO 散热片版（8TB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2148066.shtml"
+    },
+    {
+      "name": "OSCOO MD900（4TB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2181497.shtml"
+    },
+    {
+      "name": "OSCOO MD900（2TB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2181496.shtml"
+    },
+    {
+      "name": "OSCOO MD900（1TB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2181495.shtml"
+    },
+    {
+      "name": "OSCOO MD900（512GB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2181494.shtml"
+    },
+    {
+      "name": "致态TiPlus7100s《凡人》动画联名礼盒（2TB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2181208.shtml"
+    },
+    {
+      "name": "致态TiPlus7100s《凡人》动画联名礼盒（1TB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2181207.shtml"
+    },
+    {
+      "name": "华为M.2-SATA64G-A",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2180043.shtml"
+    },
+    {
+      "name": "华为M.2-SATA240G-A",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2180042.shtml"
+    },
+    {
+      "name": "华为M.2-SATA960G-A",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2180041.shtml"
+    },
+    {
+      "name": "阿斯加特V7（2TB）",
+      "url": "https://detail.zol.com.cn/solid_state_drive/index2176253.shtml"
+    },
+    {
+      "name": "西部数据蓝盘 1TB 7200转 64MB SATA3（WD10EZEX）",
+      "url": "https://detail.zol.com.cn/hard_drives/index330566.shtml"
+    },
+    {
+      "name": "希捷酷狼NAS 8TB 7200转 256MB SATA3（ST8000VN004）",
+      "url": "https://detail.zol.com.cn/hard_drives/index1322037.shtml"
+    },
+    {
+      "name": "希捷Barracuda 3TB 7200转 64MB SATA3（ST3000DM008）",
+      "url": "https://detail.zol.com.cn/hard_drives/index1158643.shtml"
+    },
+    {
+      "name": "东芝1TB 5400转 128M SATA3（MQ04ABF100）",
+      "url": "https://detail.zol.com.cn/hard_drives/index1182773.shtml"
+    },
+    {
+      "name": "中科曙光SATA",
+      "url": "https://detail.zol.com.cn/hard_drives/index1983439.shtml"
+    },
+    {
+      "name": "西部数据紫盘 4TB 64MB SATA3（WD40PURX）",
+      "url": "https://detail.zol.com.cn/hard_drives/index1137878.shtml"
+    },
+    {
+      "name": "希捷BarraCuda 2TB 7200转 256MB SATA3（ST2000DM008）",
+      "url": "https://detail.zol.com.cn/hard_drives/index1211351.shtml"
+    },
+    {
+      "name": "希捷Barracuda 1TB 7200转 64MB SATA3（ST1000DM010）",
+      "url": "https://detail.zol.com.cn/hard_drives/index1158631.shtml"
+    },
+    {
+      "name": "西部数据蓝盘 1TB 5400转 128MB SATA3（WD10SPZX）",
+      "url": "https://detail.zol.com.cn/hard_drives/index1174928.shtml"
+    },
+    {
+      "name": "西部数据蓝盘 2TB 7200转 256MB SATA3（WD20EZBX）",
+      "url": "https://detail.zol.com.cn/hard_drives/index1374417.shtml"
+    },
+    {
+      "name": "希捷Desktop HDD 4TB 5900转 64MB SATA3（ST4000DM000）",
+      "url": "https://detail.zol.com.cn/hard_drives/index349687.shtml"
+    },
+    {
+      "name": "西部数据4TB 64MB SATA3 绿盘（WD40EZRX）",
+      "url": "https://detail.zol.com.cn/hard_drives/index391334.shtml"
+    },
+    {
+      "name": "希捷Desktop 1TB 7200转 8GB混合硬盘（ST1000DX001）",
+      "url": "https://detail.zol.com.cn/hard_drives/index361873.shtml"
+    },
+    {
+      "name": "西部数据2TB 5400转 64MB SATA3 绿盘（WD20EZRX）",
+      "url": "https://detail.zol.com.cn/hard_drives/index347814.shtml"
+    },
+    {
+      "name": "HGST 7K1000 1TB 7200转 32MB SATA3（HTS721010A9E630）",
+      "url": "https://detail.zol.com.cn/hard_drives/index353086.shtml"
+    },
+    {
+      "name": "希捷Barracuda 3TB 7200转 64MB（ST3000DM001）",
+      "url": "https://detail.zol.com.cn/hard_drives/index303421.shtml"
+    },
+    {
+      "name": "HGST 7K1000 1TB 7200转 64MB SATA2（HUA722010CLA330）",
+      "url": "https://detail.zol.com.cn/hard_drives/index327594.shtml"
+    },
+    {
+      "name": "希捷Desktop HDD 500GB 7200转 64MB SATA3（ST500DM002）",
+      "url": "https://detail.zol.com.cn/hard_drives/index385452.shtml"
+    },
+    {
+      "name": "西部数据Scorpio Blue 320GB 5400转 8MB SATA2（WD3200BPVT）",
+      "url": "https://detail.zol.com.cn/hard_drives/index304452.shtml"
+    },
+    {
+      "name": "西部数据6TB 64MB SATA3 红盘 （WD60EFRX）",
+      "url": "https://detail.zol.com.cn/hard_drives/index387134.shtml"
+    },
+    {
+      "name": "希捷酷鱼 1TB 7200转 SATA（ST1000DM014）",
+      "url": "https://detail.zol.com.cn/hard_drives/index2165490.shtml"
+    },
+    {
+      "name": "东芝2TB 5400转 128MB SATA3（MQ04ABD200）",
+      "url": "https://detail.zol.com.cn/hard_drives/index1208542.shtml"
+    },
+    {
+      "name": "希捷酷狼NAS 4TB 5400转 256MB SATA3（ST4000VN006）",
+      "url": "https://detail.zol.com.cn/hard_drives/index1654410.shtml"
+    },
+    {
+      "name": "西部数据500GB 7200转 16MB SATA3 蓝盘（WD5000AAKX）",
+      "url": "https://detail.zol.com.cn/hard_drives/index270328.shtml"
+    },
+    {
+      "name": "西部数据新金盘 10TB 7200转 256M SATA3（WUS721010ALE6L4）",
+      "url": "https://detail.zol.com.cn/hard_drives/index1347369.shtml"
+    },
+    {
+      "name": "东芝P300系列 4TB 5400转 128MB SATA3（HDWD240）",
+      "url": "https://detail.zol.com.cn/hard_drives/index1360223.shtml"
+    },
+    {
+      "name": "希捷酷狼PRO 22TB 7200转 512MB SATA3（ST22000NT001）",
+      "url": "https://detail.zol.com.cn/hard_drives/index1795552.shtml"
+    },
+    {
+      "name": "希捷BarraCuda 2TB 5400转 128MB SATA3（ST2000LM015）",
+      "url": "https://detail.zol.com.cn/hard_drives/index1162517.shtml"
+    },
+    {
+      "name": "西部数据蓝盘 2TB 5400转 128MB SATA3（WD20SPZX）",
+      "url": "https://detail.zol.com.cn/hard_drives/index1248971.shtml"
+    },
+    {
+      "name": "海康威视WD82HKAI-78",
+      "url": "https://detail.zol.com.cn/hard_drives/index2176453.shtml"
+    },
+    {
+      "name": "海康威视HK7216AH",
+      "url": "https://detail.zol.com.cn/hard_drives/index2176433.shtml"
+    },
+    {
+      "name": "东芝N300 8TB 7200转 512MB SATA3 (HDWG780UZSVA)",
+      "url": "https://detail.zol.com.cn/hard_drives/index2168852.shtml"
+    },
+    {
+      "name": "东芝N300 4TB 7200转 512MB SATA3 (HDWG740UZSVC)",
+      "url": "https://detail.zol.com.cn/hard_drives/index2168851.shtml"
+    },
+    {
+      "name": "希捷酷狼PRO 24TB 7200转 256MB SATA3(ST24000NT001)",
+      "url": "https://detail.zol.com.cn/hard_drives/index2168780.shtml"
+    },
+    {
+      "name": "希捷ST10000VN000",
+      "url": "https://detail.zol.com.cn/hard_drives/index2168768.shtml"
+    },
+    {
+      "name": "希捷银河Exos X24 20TB 512MB 7200转 SATA（ST20000NM002H）",
+      "url": "https://detail.zol.com.cn/hard_drives/index2168035.shtml"
+    },
+    {
+      "name": "希捷银河Exos X24 16TB 512MB 7200转 SATA（ST16000NM002H）",
+      "url": "https://detail.zol.com.cn/hard_drives/index2168034.shtml"
+    },
+    {
+      "name": "西部数据WD Blue 4TB 5400转 128MB SATA3(WD40EZZX)",
+      "url": "https://detail.zol.com.cn/hard_drives/index2166007.shtml"
+    },
+    {
+      "name": "西部数据WD Blue 3TB 5400转 128MB SATA3(WD30EZZX)",
+      "url": "https://detail.zol.com.cn/hard_drives/index2166006.shtml"
     },
     {
       "name": "航嘉 WD750K 全模组",
       "url": "https://detail.zol.com.cn/power/index1999767.shtml"
+    },
+    {
+      "name": "长城HOPE-6000DS",
+      "url": "https://detail.zol.com.cn/power/index352863.shtml"
+    },
+    {
+      "name": "华硕ROG-LOKI-850P-SFX-GAMING",
+      "url": "https://detail.zol.com.cn/power/index1911547.shtml"
+    },
+    {
+      "name": "利民TR-KG750-W",
+      "url": "https://detail.zol.com.cn/power/index2124586.shtml"
+    },
+    {
+      "name": "海韵FOCUS GX-850",
+      "url": "https://detail.zol.com.cn/power/index1379628.shtml"
+    },
+    {
+      "name": "先马金牌750W",
+      "url": "https://detail.zol.com.cn/power/index385267.shtml"
+    },
+    {
+      "name": "航嘉WD600K",
+      "url": "https://detail.zol.com.cn/power/index1228004.shtml"
+    },
+    {
+      "name": "长城X6",
+      "url": "https://detail.zol.com.cn/power/index1899919.shtml"
+    },
+    {
+      "name": "金河田白金牌A+850W",
+      "url": "https://detail.zol.com.cn/power/index1914234.shtml"
+    },
+    {
+      "name": "海盗船RM1000x",
+      "url": "https://detail.zol.com.cn/power/index1135876.shtml"
+    },
+    {
+      "name": "海盗船AX1200i",
+      "url": "https://detail.zol.com.cn/power/index341644.shtml"
+    },
+    {
+      "name": "1st player 黑寡妇PS-700AX",
+      "url": "https://detail.zol.com.cn/power/index392198.shtml"
+    },
+    {
+      "name": "振华白金静蝶500W（SF-500P14FG）",
+      "url": "https://detail.zol.com.cn/power/index281717.shtml"
+    },
+    {
+      "name": "鑫谷GP700P白金版",
+      "url": "https://detail.zol.com.cn/power/index400190.shtml"
+    },
+    {
+      "name": "鑫谷GP600G 黑金全模版",
+      "url": "https://detail.zol.com.cn/power/index403680.shtml"
+    },
+    {
+      "name": "海盗船AX1500i",
+      "url": "https://detail.zol.com.cn/power/index379507.shtml"
+    },
+    {
+      "name": "航嘉磐石600",
+      "url": "https://detail.zol.com.cn/power/index199753.shtml"
+    },
+    {
+      "name": "海盗船VS450",
+      "url": "https://detail.zol.com.cn/power/index322063.shtml"
+    },
+    {
+      "name": "稳科轻驰兵500",
+      "url": "https://detail.zol.com.cn/power/index393535.shtml"
+    },
+    {
+      "name": "全汉蓝海5000+增强版",
+      "url": "https://detail.zol.com.cn/power/index1099047.shtml"
+    },
+    {
+      "name": "振华LEADEX III ATX3.1 1300W",
+      "url": "https://detail.zol.com.cn/power/index2085595.shtml"
+    },
+    {
+      "name": "msi微星MAG A1000GL PCIE5",
+      "url": "https://detail.zol.com.cn/power/index2119793.shtml"
+    },
+    {
+      "name": "微星MAG A850GL PCIE5",
+      "url": "https://detail.zol.com.cn/power/index1823279.shtml"
+    },
+    {
+      "name": "华硕TUF GAMING 1200W 白金重炮手",
+      "url": "https://detail.zol.com.cn/power/index2175344.shtml"
+    },
+    {
+      "name": "长城X8 白色",
+      "url": "https://detail.zol.com.cn/power/index1629091.shtml"
+    },
+    {
+      "name": "海韵vertex gx-1200 【新品】vertex峰睿1200w/atx3.0",
+      "url": "https://detail.zol.com.cn/power/index1462748.shtml"
+    },
+    {
+      "name": "振华LEADEX G850",
+      "url": "https://detail.zol.com.cn/power/index1282409.shtml"
+    },
+    {
+      "name": "利民TR-AT1650",
+      "url": "https://detail.zol.com.cn/power/index2151426.shtml"
+    },
+    {
+      "name": "振华LEADEX VIIIP1000W",
+      "url": "https://detail.zol.com.cn/power/index2151314.shtml"
+    },
+    {
+      "name": "鑫谷DM-1000P",
+      "url": "https://detail.zol.com.cn/power/index2178810.shtml"
+    },
+    {
+      "name": "世纪之星BF850",
+      "url": "https://detail.zol.com.cn/power/index2178809.shtml"
+    },
+    {
+      "name": "世纪之星BF750",
+      "url": "https://detail.zol.com.cn/power/index2178808.shtml"
+    },
+    {
+      "name": "世纪之星BF650",
+      "url": "https://detail.zol.com.cn/power/index2178807.shtml"
+    },
+    {
+      "name": "世纪之星GF1000",
+      "url": "https://detail.zol.com.cn/power/index2178779.shtml"
+    },
+    {
+      "name": "全汉Dagger 650W",
+      "url": "https://detail.zol.com.cn/power/index2178778.shtml"
+    },
+    {
+      "name": "全汉Dagger 850W",
+      "url": "https://detail.zol.com.cn/power/index2178777.shtml"
+    },
+    {
+      "name": "银欣SST-HA3000R-PM",
+      "url": "https://detail.zol.com.cn/power/index2178561.shtml"
+    },
+    {
+      "name": "航嘉狼牙650G V2",
+      "url": "https://detail.zol.com.cn/power/index2178279.shtml"
+    },
+    {
+      "name": "航嘉JUMPER650B",
+      "url": "https://detail.zol.com.cn/power/index2178278.shtml"
+    },
+    {
+      "name": "乔思伯X400",
+      "url": "https://detail.zol.com.cn/case/index2150533.shtml"
+    },
+    {
+      "name": "富善能守望先锋",
+      "url": "https://detail.zol.com.cn/case/index1276883.shtml"
+    },
+    {
+      "name": "航嘉S900沙尘暴",
+      "url": "https://detail.zol.com.cn/case/index1999765.shtml"
+    },
+    {
+      "name": "半岛铁盒W5",
+      "url": "https://detail.zol.com.cn/case/index1950014.shtml"
+    },
+    {
+      "name": "先马平头哥M2",
+      "url": "https://detail.zol.com.cn/case/index1389602.shtml"
+    },
+    {
+      "name": "爱国者炫影 G10",
+      "url": "https://detail.zol.com.cn/case/index2161177.shtml"
+    },
+    {
+      "name": "瓦尔基里VK03",
+      "url": "https://detail.zol.com.cn/case/index2090335.shtml"
+    },
+    {
+      "name": "航嘉GX750A掠夺者",
+      "url": "https://detail.zol.com.cn/case/index1999756.shtml"
+    },
+    {
+      "name": "动力火车未知玩家X100 USB3.0版",
+      "url": "https://detail.zol.com.cn/case/index1980881.shtml"
+    },
+    {
+      "name": "航嘉G63战戟",
+      "url": "https://detail.zol.com.cn/case/index2109051.shtml"
+    },
+    {
+      "name": "联力PC-P80N",
+      "url": "https://detail.zol.com.cn/case/index284868.shtml"
+    },
+    {
+      "name": "联力PC-TU200",
+      "url": "https://detail.zol.com.cn/case/index302387.shtml"
+    },
+    {
+      "name": "联力PC-A76X",
+      "url": "https://detail.zol.com.cn/case/index340945.shtml"
+    },
+    {
+      "name": "联力PC-A75X",
+      "url": "https://detail.zol.com.cn/case/index340940.shtml"
+    },
+    {
+      "name": "联力PC-X2000FN",
+      "url": "https://detail.zol.com.cn/case/index341151.shtml"
+    },
+    {
+      "name": "联力PC-D8000",
+      "url": "https://detail.zol.com.cn/case/index340938.shtml"
+    },
+    {
+      "name": "联力PC-D600",
+      "url": "https://detail.zol.com.cn/case/index364260.shtml"
+    },
+    {
+      "name": "Tt Armor A90（VL90001W2Z）",
+      "url": "https://detail.zol.com.cn/case/index241181.shtml"
+    },
+    {
+      "name": "立人E-W80",
+      "url": "https://detail.zol.com.cn/case/index397828.shtml"
+    },
+    {
+      "name": "ICE 寒霜IV水冷版",
+      "url": "https://detail.zol.com.cn/case/index391283.shtml"
+    },
+    {
+      "name": "Phanteks追风者PK620",
+      "url": "https://detail.zol.com.cn/case/index1358459.shtml"
+    },
+    {
+      "name": "联力L216",
+      "url": "https://detail.zol.com.cn/case/index1955966.shtml"
+    },
+    {
+      "name": "酷冷至尊MasterBox Pro5",
+      "url": "https://detail.zol.com.cn/case/index1210383.shtml"
+    },
+    {
+      "name": "MONTECH AIR903",
+      "url": "https://detail.zol.com.cn/case/index2103019.shtml"
+    },
+    {
+      "name": "华硕ProArt PA602",
+      "url": "https://detail.zol.com.cn/case/index1935499.shtml"
+    },
+    {
+      "name": "华硕PRIME AP303 冰立方 ATX",
+      "url": "https://detail.zol.com.cn/case/index2150489.shtml"
+    },
+    {
+      "name": "华硕TUF GAMING GT502",
+      "url": "https://detail.zol.com.cn/case/index1432961.shtml"
+    },
+    {
+      "name": "微星MAG FORGE 320R AIRFLOW",
+      "url": "https://detail.zol.com.cn/case/index2180707.shtml"
+    },
+    {
+      "name": "微星MPG VIXTA 300R AIRFLOW PZ W",
+      "url": "https://detail.zol.com.cn/case/index2180705.shtml"
+    },
+    {
+      "name": "微星MPG VIXTA 300R AIRFLOW PZ",
+      "url": "https://detail.zol.com.cn/case/index2180704.shtml"
+    },
+    {
+      "name": "巧美冰激凌pro",
+      "url": "https://detail.zol.com.cn/case/index2180076.shtml"
+    },
+    {
+      "name": "酷冷至尊Elite360 神界",
+      "url": "https://detail.zol.com.cn/case/index2180075.shtml"
+    },
+    {
+      "name": "九州风神CG580 MESH 2F",
+      "url": "https://detail.zol.com.cn/case/index2180074.shtml"
+    },
+    {
+      "name": "九州风神CH690 LCD",
+      "url": "https://detail.zol.com.cn/case/index2180073.shtml"
+    },
+    {
+      "name": "九州风神CC560 ARGB V3",
+      "url": "https://detail.zol.com.cn/case/index2180072.shtml"
+    },
+    {
+      "name": "九州风神CC350 4F",
+      "url": "https://detail.zol.com.cn/case/index2180044.shtml"
+    },
+    {
+      "name": "Tt TR300 WS",
+      "url": "https://detail.zol.com.cn/case/index2180034.shtml"
+    },
+    {
+      "name": "利民PA120 SE 青春版",
+      "url": "https://detail.zol.com.cn/cooling_product/index1424264.shtml"
+    },
+    {
+      "name": "九州风神大霜塔",
+      "url": "https://detail.zol.com.cn/cooling_product/index330336.shtml"
+    },
+    {
+      "name": "瓦尔基里B360",
+      "url": "https://detail.zol.com.cn/cooling_product/index2034278.shtml"
+    },
+    {
+      "name": "超频三红海Mini静音版",
+      "url": "https://detail.zol.com.cn/cooling_product/index196601.shtml"
+    },
+    {
+      "name": "华硕ROG龙神III 360 ARGB",
+      "url": "https://detail.zol.com.cn/cooling_product/index2034260.shtml"
+    },
+    {
+      "name": "猫头鹰NH-D15",
+      "url": "https://detail.zol.com.cn/cooling_product/index1166760.shtml"
+    },
+    {
+      "name": "利民AX120R SE",
+      "url": "https://detail.zol.com.cn/cooling_product/index1424114.shtml"
+    },
+    {
+      "name": "九州风神玄冰400",
+      "url": "https://detail.zol.com.cn/cooling_product/index315192.shtml"
+    },
+    {
+      "name": "利民AQUA ELITE 240 WHITE V3",
+      "url": "https://detail.zol.com.cn/cooling_product/index2004654.shtml"
+    },
+    {
+      "name": "利民FC140 纯黑版",
+      "url": "https://detail.zol.com.cn/cooling_product/index1424258.shtml"
+    },
+    {
+      "name": "1st player 蒸汽朋克RSS240",
+      "url": "https://detail.zol.com.cn/cooling_product/index919674.shtml"
+    },
+    {
+      "name": "酷冷至尊猎鲨200酷炫版",
+      "url": "https://detail.zol.com.cn/cooling_product/index397803.shtml"
+    },
+    {
+      "name": "ID-COOLING IS-VC45",
+      "url": "https://detail.zol.com.cn/cooling_product/index362097.shtml"
+    },
+    {
+      "name": "猫头鹰NF-S12B FLX",
+      "url": "https://detail.zol.com.cn/cooling_product/index239575.shtml"
+    },
+    {
+      "name": "超频三小海HP2-871",
+      "url": "https://detail.zol.com.cn/cooling_product/index246448.shtml"
+    },
+    {
+      "name": "超频三银甲K91",
+      "url": "https://detail.zol.com.cn/cooling_product/index276380.shtml"
+    },
+    {
+      "name": "海盗船H75",
+      "url": "https://detail.zol.com.cn/cooling_product/index375780.shtml"
+    },
+    {
+      "name": "超频三金甲K90",
+      "url": "https://detail.zol.com.cn/cooling_product/index276379.shtml"
+    },
+    {
+      "name": "九州风神冰刃200双刃版",
+      "url": "https://detail.zol.com.cn/cooling_product/index368711.shtml"
+    },
+    {
+      "name": "Tt Water 3.0 Ultimate",
+      "url": "https://detail.zol.com.cn/cooling_product/index395342.shtml"
+    },
+    {
+      "name": "瓦尔基里B360-GT",
+      "url": "https://detail.zol.com.cn/cooling_product/index2129968.shtml"
+    },
+    {
+      "name": "利民FROZEN WARFRAME 360 BLACK",
+      "url": "https://detail.zol.com.cn/cooling_product/index2111867.shtml"
+    },
+    {
+      "name": "利民AQUA ELITE 360 ARGB M12Q",
+      "url": "https://detail.zol.com.cn/cooling_product/index2179069.shtml"
+    },
+    {
+      "name": "九州风神GP-Z-AG620-G2-AMD",
+      "url": "https://detail.zol.com.cn/cooling_product/index2158687.shtml"
+    },
+    {
+      "name": "华硕ROG STRIX LC II 360",
+      "url": "https://detail.zol.com.cn/cooling_product/index2005274.shtml"
+    },
+    {
+      "name": "利民Frozen Magic 360",
+      "url": "https://detail.zol.com.cn/cooling_product/index1346515.shtml"
+    },
+    {
+      "name": "利民Rainbow Vision 360 Turbo ARGB BLACK",
+      "url": "https://detail.zol.com.cn/cooling_product/index2153989.shtml"
+    },
+    {
+      "name": "利民PA120 SE ARGB版",
+      "url": "https://detail.zol.com.cn/cooling_product/index1424265.shtml"
+    },
+    {
+      "name": "冰曼OK120 白色反叶温控版",
+      "url": "https://detail.zol.com.cn/cooling_product/index2181426.shtml"
+    },
+    {
+      "name": "冰曼OK120 白色正叶温控版",
+      "url": "https://detail.zol.com.cn/cooling_product/index2181425.shtml"
+    },
+    {
+      "name": "冰曼OK120 黑色反叶温控版",
+      "url": "https://detail.zol.com.cn/cooling_product/index2181424.shtml"
+    },
+    {
+      "name": "冰曼OK120 黑色正叶温控版",
+      "url": "https://detail.zol.com.cn/cooling_product/index2181423.shtml"
+    },
+    {
+      "name": "冰曼OK120 白色反叶标准版",
+      "url": "https://detail.zol.com.cn/cooling_product/index2181422.shtml"
+    },
+    {
+      "name": "冰曼OK120 白色正叶标准版",
+      "url": "https://detail.zol.com.cn/cooling_product/index2181421.shtml"
+    },
+    {
+      "name": "冰曼OK120 黑色反叶标准版",
+      "url": "https://detail.zol.com.cn/cooling_product/index2181420.shtml"
+    },
+    {
+      "name": "冰曼OK120 黑色正叶标准版",
+      "url": "https://detail.zol.com.cn/cooling_product/index2181419.shtml"
+    },
+    {
+      "name": "冰曼XF120 黑色-彩灯*4",
+      "url": "https://detail.zol.com.cn/cooling_product/index2181405.shtml"
+    },
+    {
+      "name": "冰曼XF120 黑色-彩灯*3",
+      "url": "https://detail.zol.com.cn/cooling_product/index2181404.shtml"
+    },
+    {
+      "name": "三星S27FG902XC",
+      "url": "https://detail.zol.com.cn/lcd/index2148072.shtml"
+    },
+    {
+      "name": "AOC Q27G40E",
+      "url": "https://detail.zol.com.cn/lcd/index2111068.shtml"
+    },
+    {
+      "name": "HKC T3252U",
+      "url": "https://detail.zol.com.cn/lcd/index1392745.shtml"
+    },
+    {
+      "name": "飞利浦27B2N3500G",
+      "url": "https://detail.zol.com.cn/lcd/index2161158.shtml"
+    },
+    {
+      "name": "AOC 27B30H",
+      "url": "https://detail.zol.com.cn/lcd/index2097577.shtml"
+    },
+    {
+      "name": "AOC U2790PQU",
+      "url": "https://detail.zol.com.cn/lcd/index1235877.shtml"
+    },
+    {
+      "name": "AOC 24B35H",
+      "url": "https://detail.zol.com.cn/lcd/index1974926.shtml"
+    },
+    {
+      "name": "戴尔P2419H",
+      "url": "https://detail.zol.com.cn/lcd/index1221914.shtml"
+    },
+    {
+      "name": "AOC Q27G4SL/WS",
+      "url": "https://detail.zol.com.cn/lcd/index2129694.shtml"
+    },
+    {
+      "name": "爱国者M140F2",
+      "url": "https://detail.zol.com.cn/lcd/index2132022.shtml"
+    },
+    {
+      "name": "AOC T3250M",
+      "url": "https://detail.zol.com.cn/lcd/index376644.shtml"
+    },
+    {
+      "name": "长城G2568E",
+      "url": "https://detail.zol.com.cn/lcd/index324209.shtml"
+    },
+    {
+      "name": "优派VA705-LED",
+      "url": "https://detail.zol.com.cn/lcd/index350849.shtml"
+    },
+    {
+      "name": "唯一P246",
+      "url": "https://detail.zol.com.cn/lcd/index387235.shtml"
+    },
+    {
+      "name": "HP W19",
+      "url": "https://detail.zol.com.cn/lcd/index111489.shtml"
+    },
+    {
+      "name": "Eizo ColorEdge CG243W",
+      "url": "https://detail.zol.com.cn/lcd/index200255.shtml"
+    },
+    {
+      "name": "Eizo FlexScan S2433W",
+      "url": "https://detail.zol.com.cn/lcd/index204447.shtml"
+    },
+    {
+      "name": "Eizo FlexScan S2233W",
+      "url": "https://detail.zol.com.cn/lcd/index214318.shtml"
+    },
+    {
+      "name": "优派VP2365wb",
+      "url": "https://detail.zol.com.cn/lcd/index215422.shtml"
+    },
+    {
+      "name": "Eizo FlexScan EV2313W",
+      "url": "https://detail.zol.com.cn/lcd/index218483.shtml"
+    },
+    {
+      "name": "AOC AGON AG277QSD",
+      "url": "https://detail.zol.com.cn/lcd/index2177553.shtml"
+    },
+    {
+      "name": "SANC OF27Q",
+      "url": "https://detail.zol.com.cn/lcd/index2104573.shtml"
+    },
+    {
+      "name": "科睿Q70X4",
+      "url": "https://detail.zol.com.cn/lcd/index2171922.shtml"
+    },
+    {
+      "name": "HKC G27H7Pro",
+      "url": "https://detail.zol.com.cn/lcd/index2106414.shtml"
+    },
+    {
+      "name": "AOC AGP327UZD",
+      "url": "https://detail.zol.com.cn/lcd/index2146203.shtml"
+    },
+    {
+      "name": "宏碁 N238VA",
+      "url": "https://detail.zol.com.cn/lcd/index2163117.shtml"
+    },
+    {
+      "name": "三星LS32D706EACXXF",
+      "url": "https://detail.zol.com.cn/lcd/index2101336.shtml"
+    },
+    {
+      "name": "外星人AW2726DM",
+      "url": "https://detail.zol.com.cn/lcd/index2163488.shtml"
+    },
+    {
+      "name": "飞利浦24E2N1110S",
+      "url": "https://detail.zol.com.cn/lcd/index2102743.shtml"
+    },
+    {
+      "name": "AOC 25G41SE/WS",
+      "url": "https://detail.zol.com.cn/lcd/index2160211.shtml"
+    },
+    {
+      "name": "微星MAG 276QRM34",
+      "url": "https://detail.zol.com.cn/lcd/index2180703.shtml"
+    },
+    {
+      "name": "msi微星MAG 276QRY28",
+      "url": "https://detail.zol.com.cn/lcd/index2180702.shtml"
+    },
+    {
+      "name": "亚胜诺PD22270B",
+      "url": "https://detail.zol.com.cn/lcd/index2180125.shtml"
+    },
+    {
+      "name": "红米P27UEC-RA",
+      "url": "https://detail.zol.com.cn/lcd/index2180100.shtml"
+    },
+    {
+      "name": "星华辰UP302K",
+      "url": "https://detail.zol.com.cn/lcd/index2180099.shtml"
+    },
+    {
+      "name": "夏新TJ-BT28Z9",
+      "url": "https://detail.zol.com.cn/lcd/index2180098.shtml"
+    },
+    {
+      "name": "微星PRO MP225 E12VL",
+      "url": "https://detail.zol.com.cn/lcd/index2180097.shtml"
+    },
+    {
+      "name": "天殊TS3200-QDT40LWX",
+      "url": "https://detail.zol.com.cn/lcd/index2180096.shtml"
+    },
+    {
+      "name": "天殊TS-T15LW",
+      "url": "https://detail.zol.com.cn/lcd/index2180095.shtml"
+    },
+    {
+      "name": "泰坦军团P2711G+",
+      "url": "https://detail.zol.com.cn/lcd/index2180094.shtml"
     }
   ],
   "web": {
