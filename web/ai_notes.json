@@ -1,0 +1,20 @@
+{
+ "date": "2026-10-24",
+ "model": "Qwen2.5-3B",
+ "summary": "",
+ "picks": [
+  {
+   "name": "AMD Ryzen 7 5700X",
+   "reason": "高性能游戏和多任务处理"
+  },
+  {
+   "name": "AMD 锐龙5 9600X",
+   "reason": "高性价比游戏处理器"
+  },
+  {
+   "name": "Intel 酷睿 i5 14600KF",
+   "reason": "高性价比游戏处理器"
+  }
+ ],
+ "generated": "2026-10-24 18:43"
+}

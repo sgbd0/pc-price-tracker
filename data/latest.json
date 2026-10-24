@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-24T10:33:05",
+  "updated": "2026-10-24T10:43:29",
   "items": [
     {
       "name": "AMD Ryzen 7 5700X",
@@ -2042,14 +2042,6 @@
       "ok": true
     },
     {
-      "name": "振华LEADEX VIIIP1000W",
-      "url": "https://detail.zol.com.cn/power/index2151314.shtml",
-      "price": 899.0,
-      "prev": null,
-      "pct": null,
-      "ok": true
-    },
-    {
       "name": "鑫谷DM-1000P",
       "url": "https://detail.zol.com.cn/power/index2178810.shtml",
       "price": 799.0,
@@ -3045,6 +3037,14 @@
       "name": "泰坦军团P2711G+",
       "url": "https://detail.zol.com.cn/lcd/index2180094.shtml",
       "price": 649.0,
+      "prev": null,
+      "pct": null,
+      "ok": true
+    },
+    {
+      "name": "振华LEADEX VIIIP1000W",
+      "url": "https://detail.zol.com.cn/power/index2151314.shtml",
+      "price": 959.0,
       "prev": null,
       "pct": null,
       "ok": true
