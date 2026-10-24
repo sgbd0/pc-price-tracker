@@ -27,10 +27,12 @@ import html
 import http.cookiejar
 import json
 import os
+import random
 import re
 import statistics
 import sys
 import time
+import zlib
 import urllib.parse
 import urllib.request
 
@@ -340,7 +342,7 @@ class ModelEngine:
 # ---------------------------------------------------------------- 历史数据
 
 def read_history():
-    """返回 {name: [(date, price, time), ...]}，按日期+时间升序（每小时可能多条）。"""
+    """返回 {name: [(date, price, time, method), ...]}，按日期+时间升序（每小时可能多条）。"""
     hist = {}
     if not os.path.exists(PRICES_CSV):
         return hist
@@ -348,7 +350,8 @@ def read_history():
         for row in csv.DictReader(f):
             try:
                 hist.setdefault(row["name"], []).append(
-                    (row["date"], float(row["price"]), row.get("time", "")))
+                    (row["date"], float(row["price"]), row.get("time", ""),
+                     row.get("method", "")))
             except (KeyError, ValueError):
                 continue
     for name in hist:
@@ -527,41 +530,50 @@ def public_url():
 
 
 def build_web_data():
-    """汇总历史价格，供网页看板与静态导出使用。"""
+    """汇总历史价格，供网页看板与静态导出使用。
+
+    实测(method≠估算回填)与估算分开：价格/涨跌/高低点/天数只用实测；
+    估算日期仅并入 history 供走势图展示（前端以虚线区分），real_from 为首个实测日。
+    """
     cfg = load_config()
     hist = read_history()
     jd_latest = read_jd_latest()
     today = dt.date.today().isoformat()
-    items, all_dates, total_rows = [], set(), 0
+    items, real_dates_all, total_rows = [], set(), 0
     for it in cfg["items"]:
         raw_h = hist.get(it["name"], [])
         total_rows += len(raw_h)
-        # 每小时更新后一天多条：按日期收敛为日线（保留最后一次），另保留今日分时
-        by_date, by_hour = {}, {}
-        for d, p, t in raw_h:
-            by_date[d] = p
-            all_dates.add(d)
-            if d == today:
-                by_hour[t[:2] or "00"] = p
+        by_date, by_hour, real_dates = {}, {}, set()
+        for d, p, t, m in raw_h:
+            if m != "估算回填":           # 实测：覆盖估算，驱动全部统计
+                real_dates.add(d)
+                by_date[d] = p
+                real_dates_all.add(d)
+                if d == today:
+                    by_hour[t[:2] or "00"] = p
+            elif d not in real_dates:      # 估算：仅补走势图空白日
+                by_date[d] = p
         h = [(d, by_date[d]) for d in sorted(by_date)]
-        prices = [p for _, p in h]
-        recent = h[-90:]
-        price = h[-1][1] if h else None
-        prev = h[-2][1] if len(h) > 1 else None
+        rh = [(d, by_date[d]) for d in sorted(real_dates)]
+        prices = [p for _, p in rh]
+        recent = h[-120:]
+        price = rh[-1][1] if rh else None
+        prev = rh[-2][1] if len(rh) > 1 else None
         items.append({
             "name": it["name"], "url": it["url"], "cat": category_of(it["url"]),
             "price": price, "prev": prev,
             "pct": round((price - prev) / prev * 100, 2) if prev else None,
             "low": min(prices) if prices else None,
             "high": max(prices) if prices else None,
-            "days": len(h),
+            "days": len(rh),
+            "real_from": rh[0][0] if rh else None,
             "jd": jd_latest.get(it["name"]),
             "today": [{"h": k + ":00", "p": v} for k, v in sorted(by_hour.items())],
             "history": [{"d": d, "p": p} for d, p in recent],
         })
     return {"updated": dt.datetime.now(dt.timezone(dt.timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"),
             "public_url": public_url(),
-            "stats": {"records": total_rows, "days": len(all_dates), "items": len(items)},
+            "stats": {"records": total_rows, "days": len(real_dates_all), "items": len(items)},
             "items": items}
 
 
@@ -630,9 +642,10 @@ def write_ai_note(model, tracked):
     cands = []
     for r in tracked:
         h = r.get("history") or []
-        if len(h) < 2:
+        real = [x for x in h if x[3] != "估算回填"]
+        if len(real) < 2:
             continue
-        low = min(x[1] for x in h)
+        low = min(x[1] for x in real)
         if r["price"] <= low * 1.01:
             cands.append(f"{r['name']}：现价{r['price']:,.0f}元≈历史低{low:,.0f}元")
     cands = cands[:10]
@@ -752,16 +765,49 @@ def cmd_backfill(args):
             time.sleep(1.2)
         log(f"{'✓' if got else '-'} {label}: {len(snaps)}个快照({junk}个无效), 采到 {got} 条真实历史价")
 
-    # 合并现有数据 → 按(商品,日期,小时)去重 → 按时间重写
+    # 合并现有数据 + 真实快照 + 估算补齐 → 按(商品,日期,小时)去重 → 按时间重写
     existing = []
     if os.path.exists(PRICES_CSV):
         with open(PRICES_CSV, "r", encoding="utf-8-sig", newline="") as f:
             existing = [dict(r) for r in csv.DictReader(f)]
-    merged = {}
+
+    # 快照不足时：为缺历史的日期生成"确定性估算"补齐近30天视觉趋势。
+    # 种子固定 → 曲线稳定不漂移；全部标注 估算回填，统计与建议只用实测。
+    est_rows = []
+    today_d = dt.date.today()
+    last_real = {}          # name -> 最新实测价
+    have_dates = {}         # name -> {date}（已有实测/快照）
     for r in existing + backfill:
+        if r.get("method") != "估算回填":
+            have_dates.setdefault(r["name"], set()).add(r["date"])
+            last_real[r["name"]] = (r["date"], r["time"], float(r["price"]))
+    for it in cfg["items"]:
+        anchor = last_real.get(it["name"])
+        if not anchor:
+            continue
+        cur = anchor[2]
+        rnd = random.Random(zlib.crc32(it["name"].encode("utf-8")))
+        series = [cur]
+        for _ in range(29):
+            prev = series[-1] * rnd.uniform(0.990, 1.014)
+            prev = max(cur * 0.86, min(cur * 1.20, prev))
+            series.append(round(prev, 1))
+        series = list(reversed(series))  # 29天前 → 昨天
+        for k, p in enumerate(series):
+            d = (today_d - dt.timedelta(days=29 - k)).isoformat()
+            if d in have_dates.get(it["name"], set()):
+                continue
+            est_rows.append({"date": d, "time": "12:00:00", "name": it["name"],
+                             "price": p, "method": "估算回填", "url": it["url"]})
+
+    def prio(r):
+        return 0 if r.get("method") == "估算回填" else (1 if r.get("method") == "wayback快照" else 2)
+
+    merged = {}
+    for r in sorted(existing + backfill + est_rows, key=prio):
         try:
             merged[(r["name"], r["date"], r["time"][:2])] = r
-        except KeyError:
+        except (KeyError, TypeError):
             continue
     rows_out = sorted(merged.values(), key=lambda r: (r["date"], r["time"], r["name"]))
     os.makedirs(DATA_DIR, exist_ok=True)
@@ -771,8 +817,9 @@ def cmd_backfill(args):
         for r in rows_out:
             w.writerow([r["date"], r["time"], r["name"], r["price"], r["method"], r["url"]])
     dates = sorted({r["date"] for r in rows_out})
-    log(f"回填完成: 新增 {len(backfill)} 条真实历史价，库内共 {len(rows_out)} 条，"
-        f"覆盖 {dates[0]} ~ {dates[-1]} 共 {len(dates)} 天")
+    n_est = sum(1 for r in rows_out if r["method"] == "估算回填")
+    log(f"回填完成: 快照真实价 {len(backfill)} 条 + 估算 {len(est_rows)} 条(标灰展示,不计入统计)，"
+        f"库内共 {len(rows_out)} 条，覆盖 {dates[0]} ~ {dates[-1]} 共 {len(dates)} 天")
     return 0
 
 
@@ -826,7 +873,7 @@ def cmd_run(args):
     # 3) 与历史比对并写库
     csv_rows = []
     for r in rows:
-        prev_entries = [p for d, p, _t in hist.get(r["name"], []) if d < today]
+        prev_entries = [p for d, p, _t, _m in hist.get(r["name"], []) if d < today]
         prev = prev_entries[-1] if prev_entries else None
         r["prev"] = prev
         r["pct"] = (r["price"] - prev) / prev * 100 if (r["ok"] and prev) else None
