@@ -152,8 +152,7 @@ async function load(){
 }
 
 function stats(it){
-  const rf=it.real_from||'9999-12-31';
-  const v=(it.history||[]).filter(h=>h.d>=rf).map(h=>h.p);
+  const v=(it.history||[]).map(h=>h.p);
   const last30=v.slice(-30);
   const min=Math.min(...v),max=Math.max(...v);
   const avg30=last30.length?last30.reduce((a,b)=>a+b,0)/last30.length:null;
@@ -234,7 +233,7 @@ function render(){
     `<span>你已访问 <b>${visits}</b> 次</span>`+
     `<span>收藏 <b>${FAVS.size}</b> 款</span>`;
   document.getElementById('foot').innerHTML=
-    `数据来源: ZOL 参考报价 + 京东渠道价 · GitHub 服务器每小时自动更新 · 🥬 白菜价=实测记录期最低价<br>走势图中<b>虚线段为估算回填</b>（真实历史存档不足，仅示意趋势）；价格、涨跌、白菜价与建议<b>只用实测数据</b> · 推荐由 Qwen2.5-3B 每日自动生成`;
+    `数据来源: ZOL 参考报价 + 京东渠道价（CPU/显卡/主板详情页提供；淘宝/拼多多需登录无法匿名抓取）· 每小时自动更新<br>30天历史含估算回填段（图表虚线），白菜价/趋势/建议基于全区间数据生成，实测数据逐日替换估算 · 推荐由 Qwen2.5-3B 自动生成`;
 }
 
 const card=(n,t,c,f)=>`<div class="card ${f&&f!=='avg'?'clk':''}" ${f?`data-f="${f}"`:''}><div class="n" ${c?`style="color:${c}"`:''}>${n}</div><div class="t">${t}</div></div>`;
@@ -283,8 +282,8 @@ function renderRows(){
       <td class="price">${fmt(it.price)}</td>
       <td>${it.jd!=null?`<span class="jdtag">京</span>${fmt(it.jd)}`:'—'}</td>
       <td>${pctSpan(it.pct)}</td>
-      <td class="${a.c==='bargain'?'bargain':''}">${s.len>=2?fmt(s.min):'—'}</td>
-      <td>${s.len>=2?gapTxt:'—'}</td>
+      <td class="${a.c==='bargain'?'bargain':''}">${s.min!=null?fmt(s.min):'—'}</td>
+      <td>${gapTxt}</td>
       <td class="hidem">${spark(it.history)}</td>
       <td class="adv-${a.c}">${a.t}</td>
     </tr>`;
