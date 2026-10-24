@@ -27,6 +27,9 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:"Microsoft YaHei
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:10px;margin-bottom:14px}
 .card{background:var(--card);border-radius:14px;padding:12px 15px;box-shadow:0 2px 10px rgba(22,32,64,.07)}
 .card .n{font-size:22px;font-weight:700}.card .t{color:var(--sub);font-size:11.5px;margin-top:2px}
+.card.clk{cursor:pointer;transition:transform .12s,box-shadow .12s}
+.card.clk:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(22,32,64,.14)}
+.card.clk.act{outline:2px solid var(--acc);outline-offset:2px}
 .ranks{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:720px){.ranks{grid-template-columns:1fr}}
 .rk{font-size:13px}.rk div{padding:4px 0;border-bottom:1px dashed #eef1f6;cursor:pointer;display:flex;justify-content:space-between;gap:8px}
@@ -112,6 +115,7 @@ footer{color:var(--sub);font-size:12px;margin:12px 0 0;line-height:1.8;text-alig
         <option value="fav">排序：收藏优先</option>
       </select>
       <button class="btn" id="onlyFav">★ 只看收藏</button>
+      <button class="btn" id="fadvChip" style="display:none"></button>
       <button class="btn" id="exportCsv">⬇ 导出CSV</button>
       <span class="count" id="count"></span>
     </div>
@@ -130,7 +134,7 @@ footer{color:var(--sub);font-size:12px;margin:12px 0 0;line-height:1.8;text-alig
 <script>
 const UP='#e04545', DOWN='#189a5c', FLAT='#8a93a3';
 const CAT_COLORS={'CPU':'#5b6ee1','主板':'#8e5bd1','内存':'#d1843b','显卡':'#3ba7a0','固态硬盘':'#4f9d5d','机械硬盘':'#7a8b3c','电源':'#c26a1f','机箱':'#b05a6e','散热器':'#3c8bbf','显示器':'#c95570','配件':'#8a93a3'};
-let DATA=null, ITEMS=[], S={}, sel=0, rangeN=30, hoverX=-1, fCat='全部', fSearch='', fSort='cat', onlyFav=false;
+let DATA=null, ITEMS=[], S={}, sel=0, rangeN=30, hoverX=-1, fCat='全部', fSearch='', fSort='cat', onlyFav=false, fAdv=null;
 let FAVS=(()=>{try{return new Set(JSON.parse(localStorage.getItem('ppf')||'[]'))}catch(e){return new Set()}})();
 let visits=(+localStorage.getItem('ppv')||0)+1; localStorage.setItem('ppv',visits);
 const saveFavs=()=>localStorage.setItem('ppf',JSON.stringify([...FAVS]));
@@ -187,11 +191,18 @@ function render(){
   const pcts=withA.filter(x=>x.it.pct!=null).map(x=>x.it.pct);
   const avg=pcts.length?pcts.reduce((a,b)=>a+b,0)/pcts.length:0;
   document.getElementById('cards').innerHTML=
-    card(ITEMS.length,'监控配件')+
-    card(bargains.length,'🥬 已到白菜价','#0d7a3e')+
-    card(ups.length,'今日上涨',UP)+
-    card(downs.length,'今日下跌',DOWN)+
+    card(ITEMS.length,'监控配件',null,'all')+
+    card(bargains.length,'🥬 已到白菜价','#0d7a3e','bargain')+
+    card(ups.length,'今日上涨',UP,'up')+
+    card(downs.length,'今日下跌',DOWN,'down')+
     card(pcts.length?avg.toFixed(2):'0.00','平均涨跌 %',avg<-0.05?DOWN:(avg>0.05?UP:FLAT));
+  // 点击卡片即筛选对应配件并定位到列表（白菜价/上涨/下跌；再点一次取消）
+  document.querySelectorAll('.card.clk').forEach(c=>c.onclick=()=>{
+    const f=c.dataset.f;
+    fAdv=(f==='all')?null:(fAdv===f?null:f);
+    syncAdv();renderRows();
+    document.querySelector('.tblwrap').scrollIntoView({behavior:'smooth',block:'start'});
+  });
 
   const rk=(list,cls)=>list.length?list.map(x=>
     `<div data-n="${esc(x.it.name)}"><span>${esc(x.it.name)}</span><span class="pct ${cls}">${x.it.pct>0?'+':''}${x.it.pct.toFixed(1)}%</span></div>`).join('')
@@ -226,13 +237,24 @@ function render(){
     `数据来源: ZOL 参考报价 + 京东渠道价 · GitHub 服务器每小时自动更新 · 🥬 白菜价=实测记录期最低价<br>走势图中<b>虚线段为估算回填</b>（真实历史存档不足，仅示意趋势）；价格、涨跌、白菜价与建议<b>只用实测数据</b> · 推荐由 Qwen2.5-3B 每日自动生成`;
 }
 
-const card=(n,t,c)=>`<div class="card"><div class="n" ${c?`style="color:${c}"`:''}>${n}</div><div class="t">${t}</div></div>`;
+const card=(n,t,c,f)=>`<div class="card ${f&&f!=='avg'?'clk':''}" ${f?`data-f="${f}"`:''}><div class="n" ${c?`style="color:${c}"`:''}>${n}</div><div class="t">${t}</div></div>`;
+
+const ADV_NAMES={bargain:'🥬 白菜价',up:'今日上涨',down:'今日下跌'};
+function syncAdv(){
+  const chip=document.getElementById('fadvChip');
+  document.querySelectorAll('.card.clk').forEach(c=>c.classList.toggle('act',c.dataset.f===fAdv));
+  if(fAdv){chip.style.display='';chip.textContent='✕ 取消筛选: '+ADV_NAMES[fAdv];}
+  else chip.style.display='none';
+}
 
 function visible(){
   let list=ITEMS.map((it,idx)=>({it,idx,s:S[it.name]}));
   if(fCat!=='全部')list=list.filter(x=>x.it.cat===fCat);
   if(fSearch)list=list.filter(x=>x.it.name.toLowerCase().includes(fSearch));
   if(onlyFav)list=list.filter(x=>FAVS.has(x.it.name));
+  if(fAdv==='bargain')list=list.filter(x=>x.s.len>=2&&x.it.price<=x.s.min*1.005);
+  if(fAdv==='up')list=list.filter(x=>x.it.pct!=null&&x.it.pct>0.05);
+  if(fAdv==='down')list=list.filter(x=>x.it.pct!=null&&x.it.pct<-0.05);
   const sorters={
     cat:(a,b)=>(FAVS.has(b.it.name)-FAVS.has(a.it.name))||((a.it.cat===b.it.cat)?(Math.abs(b.it.pct||0)-Math.abs(a.it.pct||0)):a.it.cat.localeCompare(b.it.cat,'zh')),
     fav:(a,b)=>(FAVS.has(b.it.name)-FAVS.has(a.it.name))||a.it.name.localeCompare(b.it.name,'zh'),
@@ -247,6 +269,10 @@ function visible(){
 function renderRows(){
   const list=visible();
   document.getElementById('count').textContent=`共 ${list.length} 款`;
+  if(!list.length){
+    document.getElementById('rows').innerHTML='<tr><td colspan="8" style="color:var(--sub);text-align:center;padding:26px">没有符合当前筛选的配件</td></tr>';
+    return;
+  }
   document.getElementById('rows').innerHTML=list.map(({it,idx,s})=>{
     const a=advice(it,s);
     const col=CAT_COLORS[it.cat]||'#8a93a3';
@@ -367,6 +393,7 @@ document.getElementById('search').oninput=e=>{fSearch=e.target.value.trim().toLo
 document.getElementById('catSel').onchange=e=>{fCat=e.target.value;renderRows();};
 document.getElementById('sortSel').onchange=e=>{fSort=e.target.value;renderRows();};
 document.getElementById('onlyFav').onclick=e=>{onlyFav=!onlyFav;e.target.textContent=onlyFav?'★ 已只看收藏':'★ 只看收藏';renderRows();};
+document.getElementById('fadvChip').onclick=()=>{fAdv=null;syncAdv();renderRows();};
 document.getElementById('exportCsv').onclick=()=>{
   let csv='分类,商品,参考价,京东价,今日涨跌%,白菜价,URL\n';
   for(const it of ITEMS){
