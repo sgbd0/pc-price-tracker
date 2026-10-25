@@ -1,20 +1,8 @@
 {
- "date": "2026-10-24",
- "model": "Qwen2.5-3B",
- "summary": "",
- "picks": [
-  {
-   "name": "AMD Ryzen 7 5700X",
-   "reason": "历史最低价1,999元"
-  },
-  {
-   "name": "AMD 锐龙5 9600X",
-   "reason": "历史最低价1,499元"
-  },
-  {
-   "name": "Intel 酷睿 i5 14600KF",
-   "reason": "历史最低价2,499元"
-  }
- ],
- "generated": "2026-10-24 18:50"
+ "date": "2026-10-25",
+ "model": "Qwen2.5-1.5B",
+ "summary": "冰曼配件价格小幅波动，AMD处理器价格下调。",
+ "picks": [],
+ "focus": null,
+ "generated": "2026-10-25 10:49"
 }
