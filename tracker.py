@@ -522,7 +522,8 @@ CATEGORIES = [
 
 CAT_MAP = [("cpu", "CPU"), ("motherboard", "主板"), ("memory", "内存"), ("vga", "显卡"),
            ("solid_state", "固态硬盘"), ("hard_drives", "机械硬盘"), ("power", "电源"),
-           ("case", "机箱"), ("cooling", "散热器"), ("lcd", "显示器")]
+           ("case", "机箱"), ("cooling", "散热器"), ("lcd", "显示器"),
+           ("keyboard", "键盘"), ("mice", "鼠标")]
 
 # 品类列表页结构：<a title="商品名" href="/slug/indexN.shtml"> … ￥价格
 LIST_RE = re.compile(r'<a title="([^"]{4,80})" href="(/[a-z_]+/index\d+\.shtml)"'
