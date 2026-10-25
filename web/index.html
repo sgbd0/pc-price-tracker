@@ -71,6 +71,34 @@ a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
 .statline b{color:var(--txt)}
 footer{color:var(--sub);font-size:12px;margin:12px 0 0;line-height:1.8;text-align:center}
 @media(max-width:720px){.hidem{display:none}td.name{min-width:170px}}
+html[data-theme=dark]{--bg:#111521;--card:#1a2130;--line:#2a3347;--txt:#e7ecf7;--sub:#8b95ad}
+html[data-theme=dark] .topbar{background:linear-gradient(120deg,#0d1220,#1a2540 55%,#3d5afe22)}
+html[data-theme=dark] .hero{background:linear-gradient(120deg,#1a2130,#20304e);border-color:#2c3a58}
+html[data-theme=dark] .hero .sum{color:#c0c9dd}
+html[data-theme=dark] .picks span{background:#223354;border-color:#33477a;color:#b9c8ee}
+html[data-theme=dark] th{background:#161d2b}
+html[data-theme=dark] tbody tr:hover,html[data-theme=dark] .rk div:hover{background:#212a3d}
+html[data-theme=dark] tbody tr.sel{background:#233350}
+html[data-theme=dark] input[type=search],html[data-theme=dark] select,html[data-theme=dark] button.btn,html[data-theme=dark] .range button{background:#1a2130;color:var(--txt)}
+html[data-theme=dark] #tooltip{background:#e7ecf7;color:#111828}
+.bell{cursor:pointer;font-size:13px;margin-right:2px;opacity:.35;user-select:none;-webkit-user-select:none;padding:6px 4px;margin-left:-8px;touch-action:manipulation;display:inline-block}
+.bell.set{opacity:.85}
+.bell.hit{opacity:1;animation:bp 1.2s infinite}
+@keyframes bp{50%{transform:scale(1.3)}}
+tr.alr td{background:#fff1ee}
+html[data-theme=dark] tr.alr td{background:#3a2622}
+.alr-item{display:inline-block;background:#fdeeea;border:1px solid #f5c6bd;border-radius:8px;padding:2px 8px;margin:2px 4px;font-size:12px;cursor:pointer}
+html[data-theme=dark] .alr-item{background:#3a2622;border-color:#5a3a32}
+.alr-item i{font-style:normal;margin-left:6px;color:#b0554a;cursor:pointer;font-weight:700}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px 14px}
+.bgrid label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--sub)}
+.bgrid select{width:100%}
+.btot{margin-top:10px;font-size:13.5px;color:var(--sub);line-height:1.6}
+.ct{display:flex;align-items:center;gap:10px;font-size:12.5px;padding:3px 0;cursor:pointer}
+.ct:hover{background:var(--bg)}
+.ctl{width:64px;color:var(--sub);flex:none}
+.ctbar{flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden}
+.ctbar i{display:block;height:100%}
 </style>
 </head>
 <body>
@@ -80,10 +108,13 @@ footer{color:var(--sub);font-size:12px;margin:12px 0 0;line-height:1.8;text-alig
   <span class="chip" id="daybadge"></span>
   <span class="chip">👁 全网 <b id="gv">…</b> 次</span>
   <span class="chip">👥 全网 <b id="gu">…</b> 人</span>
+  <span class="chip" id="thBtn" style="cursor:pointer">🌙 主题</span>
 </div></div>
 
 <div class="body">
   <div class="panel hero" id="aiPanel" style="display:none"></div>
+
+  <div class="panel" id="alertPanel" style="display:none"></div>
 
   <div class="cards" id="cards"></div>
 
@@ -92,6 +123,13 @@ footer{color:var(--sub);font-size:12px;margin:12px 0 0;line-height:1.8;text-alig
       <div><h2>📈 今日涨幅 TOP5</h2><div class="rk" id="rankUp"></div></div>
       <div><h2>📉 今日跌幅 TOP5</h2><div class="rk" id="rankDown"></div></div>
     </div>
+    <div id="catTrend"></div>
+  </div>
+
+  <div class="panel" id="buildPanel" style="display:none">
+    <h2>🛠️ 装机清单 <span style="color:var(--sub);font-size:12px;font-weight:400">按类别选配，实时计算参考总价与渠道最优总价（保存在本机浏览器）</span></h2>
+    <div id="buildBody"></div>
+    <div class="controls" style="margin-top:10px"><button class="btn" id="buildClear">清空清单</button></div>
   </div>
 
   <div class="panel">
@@ -126,6 +164,7 @@ footer{color:var(--sub);font-size:12px;margin:12px 0 0;line-height:1.8;text-alig
       <button class="btn" id="onlyFav">★ 只看收藏</button>
       <button class="btn" id="fadvChip" style="display:none"></button>
       <button class="btn" id="exportCsv">⬇ 导出CSV</button>
+      <button class="btn" id="buildBtn">🛠️ 装机清单</button>
       <span class="count" id="count"></span>
     </div>
     <div class="tblwrap">
@@ -142,10 +181,14 @@ footer{color:var(--sub);font-size:12px;margin:12px 0 0;line-height:1.8;text-alig
 
 <script>
 const UP='#e04545', DOWN='#189a5c', FLAT='#8a93a3';
-const CAT_COLORS={'CPU':'#5b6ee1','主板':'#8e5bd1','内存':'#d1843b','显卡':'#3ba7a0','固态硬盘':'#4f9d5d','机械硬盘':'#7a8b3c','电源':'#c26a1f','机箱':'#b05a6e','散热器':'#3c8bbf','显示器':'#c95570','配件':'#8a93a3'};
+const CAT_COLORS={'CPU':'#5b6ee1','主板':'#8e5bd1','内存':'#d1843b','显卡':'#3ba7a0','固态硬盘':'#4f9d5d','机械硬盘':'#7a8b3c','电源':'#c26a1f','机箱':'#b05a6e','散热器':'#3c8bbf','显示器':'#c95570','键盘':'#946b2d','鼠标':'#5f8a4b','配件':'#8a93a3'};
 let DATA=null, ITEMS=[], S={}, sel=0, rangeN=30, hoverX=-1, fCat='全部', fSearch='', fSort='cat', onlyFav=false, fAdv=null;
 let FAVS=(()=>{try{return new Set(JSON.parse(localStorage.getItem('ppf')||'[]'))}catch(e){return new Set()}})();
 let visits=(+localStorage.getItem('ppv')||0)+1; localStorage.setItem('ppv',visits);
+let ALERTS=(()=>{try{return JSON.parse(localStorage.getItem('ppa')||'{}')}catch(e){return{}}})();
+const saveAlerts=()=>localStorage.setItem('ppa',JSON.stringify(ALERTS));
+let BUILD=(()=>{try{return JSON.parse(localStorage.getItem('ppb')||'{}')}catch(e){return{}}})();
+const saveBuild=()=>localStorage.setItem('ppb',JSON.stringify(BUILD));
 const saveFavs=()=>localStorage.setItem('ppf',JSON.stringify([...FAVS]));
 const fmt=n=>n==null?'-':'¥'+n.toLocaleString('zh-CN',{maximumFractionDigits:0});
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -245,12 +288,15 @@ function render(){
   pick.onchange=e=>{sel=+e.target.value;drawChart();markSel();};
 
   renderRows();markSel();drawChart();
+  renderAlerts();renderCatTrend();
+  if(document.getElementById('buildPanel').style.display!=='none')renderBuild();
 
   document.getElementById('stats').innerHTML=
     `<span>累计价格记录 <b>${(st.records||0).toLocaleString()}</b> 条</span>`+
     `<span>数据覆盖 <b>${st.days||maxDays}</b> 天</span>`+
     `<span>累计监控 <b>${st.items||ITEMS.length}</b> 款</span>`+
     `<span>你已访问 <b>${visits}</b> 次</span>`+
+    `<span>🔔 提醒 <b>${Object.keys(ALERTS).length}</b> 项</span>`+
     `<span>收藏 <b>${FAVS.size}</b> 款</span>`;
   document.getElementById('foot').innerHTML=
     `数据来源: ZOL 参考报价 + 京东渠道价（京）+ ZOL商家最低价（商）· 每小时自动更新 · 🥬 白菜价=网上渠道(京东/商家)与记录期的最低价，京/商/史为来源<br>30天前历史含估算回填（图表虚线），实测逐日替换 · ⛔ 高位/连涨/远高于白菜价会明确标注"不建议入" · 建议仅供参考`;
@@ -298,8 +344,10 @@ function renderRows(){
     const col=CAT_COLORS[it.cat]||'#8a93a3';
     const gapTxt=s.gap==null?'-':(s.gap<=0.5?'<span class="gap-good">触底</span>':`+${s.gap.toFixed(1)}%`);
     const fav=FAVS.has(it.name);
-    return `<tr data-i="${idx}">
-      <td class="name"><span class="star ${fav?'on':''}" data-fav="${esc(it.name)}">${fav?'★':'☆'}</span><span class="cat-tag" style="background:${col}">${it.cat}</span><a href="${it.url}" target="_blank" onclick="event.stopPropagation()">${esc(it.name)}</a></td>
+    const tgt=ALERTS[it.name];
+    const hit=tgt&&it.price!=null&&it.price<=tgt;
+    return `<tr data-i="${idx}" class="${hit?'alr':''}">
+      <td class="name"><span class="bell ${tgt?'set':''} ${hit?'hit':''}" data-alert="${esc(it.name)}">🔔</span><span class="star ${fav?'on':''}" data-fav="${esc(it.name)}">${fav?'★':'☆'}</span><span class="cat-tag" style="background:${col}">${it.cat}</span><a href="${it.url}" target="_blank" onclick="event.stopPropagation()">${esc(it.name)}</a></td>
       <td class="price">${fmt(it.price)}</td>
       <td>${it.jd!=null?`<span class="jdtag">京</span>${fmt(it.jd)}`:(it.shop!=null?`<span class="jdtag" style="background:#3c8bbf">商</span>${fmt(it.shop)}`:'—')}</td>
       <td>${pctSpan(it.pct)}</td>
@@ -313,6 +361,18 @@ function renderRows(){
 }
 // 行内点击统一委托：优先星标收藏（放大命中区，兼容触屏），否则选中走势图
 document.getElementById('rows').addEventListener('click',e=>{
+  const bell=e.target.closest('[data-alert]');
+  if(bell){
+    e.preventDefault();e.stopPropagation();
+    const n=bell.dataset.alert;
+    const it2=ITEMS.find(x=>x.name===n), s2=it2?S[n]:null;
+    const suggest=(s2&&s2.bargain)?Math.round(s2.bargain):(it2?Math.round(it2.price*0.9):'');
+    const v=prompt('🔔 目标价：到价即提醒（输入0清除）——'+n, ALERTS[n]||suggest);
+    if(v===null)return;
+    const num=parseFloat(v);
+    if(!num||num<=0)delete ALERTS[n];else ALERTS[n]=num;
+    saveAlerts();renderAlerts();renderRows();return;
+  }
   const star=e.target.closest('[data-fav]');
   if(star){
     e.preventDefault();e.stopPropagation();
@@ -327,6 +387,73 @@ document.getElementById('rows').addEventListener('click',e=>{
 });
 
 function markSel(){document.querySelectorAll('#rows tr').forEach(tr=>tr.classList.toggle('sel',+tr.dataset.i===sel));}
+
+function renderAlerts(){
+  const el=document.getElementById('alertPanel');
+  const names=Object.keys(ALERTS);
+  if(!names.length){el.style.display='none';return;}
+  const hitRows=[],wait=[];
+  for(const n of names){
+    const it=ITEMS.find(x=>x.name===n);
+    if(!it){delete ALERTS[n];continue;}
+    const t=ALERTS[n];
+    (it.price!=null&&it.price<=t?hitRows:wait).push({n,it,t});
+  }
+  if(!hitRows.length&&!wait.length){el.style.display='none';return;}
+  let html=`🔔 <b>价格提醒</b> `;
+  if(hitRows.length){
+    html+=`<span style="color:#c0392b"><b>${hitRows.length} 项已到价！</b></span> `+
+      hitRows.map(x=>`<span class="alr-item" data-jump="${esc(x.n)}">${esc(x.n)} ${fmt(x.it.price)} ≤ 目标¥${x.t}<i data-del="${esc(x.n)}">✕</i></span>`).join('')+' ';
+  }
+  html+=`<span style="color:var(--sub)">待触发 ${wait.length} 项（点击行内🔔可修改/清除）</span>`;
+  el.innerHTML=html;el.style.display='';
+  el.querySelectorAll('[data-del]').forEach(i=>i.onclick=e=>{e.stopPropagation();delete ALERTS[i.dataset.del];saveAlerts();renderAlerts();renderRows();});
+  el.querySelectorAll('.alr-item').forEach(s=>s.onclick=()=>{
+    const i=ITEMS.findIndex(x=>x.name===s.dataset.jump);
+    if(i>=0){sel=i;pick.value=i;drawChart();markSel();}
+  });
+}
+
+function renderCatTrend(){
+  const el=document.getElementById('catTrend');
+  const agg={};
+  for(const it of ITEMS){const s=S[it.name];if(s&&s.pct30!=null){(agg[it.cat]=agg[it.cat]||[]).push(s.pct30);}}
+  const rows=Object.entries(agg).map(([c,a])=>[c,a.reduce((x,y)=>x+y,0)/a.length]).sort((a,b)=>a[1]-b[1]);
+  if(!rows.length){el.innerHTML='';return;}
+  const mx=Math.max(...rows.map(r=>Math.abs(r[1])),1);
+  el.innerHTML='<h2 style="margin-top:14px">📊 板块 30 天动向（分类均值，点击筛选）</h2>'+
+    rows.map(([c,p])=>`<div class="ct" data-cat="${c}"><span class="ctl">${c}</span><span class="ctbar"><i style="width:${(Math.abs(p)/mx*100).toFixed(0)}%;background:${p<0?'var(--down)':'var(--up)'}"></i></span><span class="${p<0?'down':'up'}" style="width:56px;text-align:right;flex:none">${p.toFixed(1)}%</span></div>`).join('');
+  el.querySelectorAll('.ct').forEach(d=>d.onclick=()=>{
+    fCat=d.dataset.cat;const cs=document.getElementById('catSel');
+    if([...cs.options].some(o=>o.value===fCat)){cs.value=fCat;renderRows();}
+  });
+}
+
+function renderBuild(){
+  const box=document.getElementById('buildBody');
+  const cats=[...new Set(ITEMS.map(i=>i.cat))];
+  let ref=0,best=0,picks=0;
+  let html='<div class="bgrid">';
+  for(const c of cats){
+    const items=ITEMS.filter(i=>i.cat===c).sort((a,b)=>a.price-b.price);
+    const selName=BUILD[c];
+    const opts=items.map(i=>{
+      const ch=[i.jd,i.shop].filter(x=>x!=null);
+      const b=ch.length?Math.min(i.price,...ch):i.price;
+      return `<option value="${esc(i.name)}"${i.name===selName?' selected':''}>${esc(i.name.slice(0,24))} — ¥${Math.round(b).toLocaleString()}</option>`;
+    }).join('');
+    const sel=items.find(i=>i.name===selName);
+    if(sel){picks++;ref+=sel.price;const ch=[sel.jd,sel.shop].filter(x=>x!=null);best+=ch.length?Math.min(sel.price,...ch):sel.price;}
+    html+=`<label><span>${c}</span><select data-bcat="${c}"><option value="">— 不选 —</option>${opts}</select></label>`;
+  }
+  html+='</div>';
+  html+=`<div class="btot">已选 <b>${picks}</b> 个类别 · 参考总价 <b>¥${Math.round(ref).toLocaleString()}</b> · 渠道最优总价 <b style="color:#0d7a3e">¥${Math.round(best).toLocaleString()}</b> · 至多可省 <b>¥${Math.round(ref-best).toLocaleString()}</b></div>`;
+  box.innerHTML=html;
+  box.querySelectorAll('select[data-bcat]').forEach(s=>s.onchange=()=>{
+    if(s.value)BUILD[s.dataset.bcat]=s.value;else delete BUILD[s.dataset.bcat];
+    saveBuild();renderBuild();
+  });
+}
 
 function spark(hist){
   if(!hist||!hist.length)return '';
@@ -351,23 +478,25 @@ function drawChart(){
   else{hist=it.history||[];if(rangeN>0)hist=hist.slice(-rangeN);}
   const svg=document.getElementById('chart');
   const W=880,H=300,L=64,R=16,T=18,B=34;
-  if(!hist.length){svg.innerHTML='<text x="440" y="150" text-anchor="middle" font-size="13" fill="#8a93a3">暂无该时段数据</text>';return;}
+  if(!hist.length){svg.innerHTML='<text x="440" y="150" text-anchor="middle" font-size="13" fill="${LBL}">暂无该时段数据</text>';return;}
   const vals=hist.map(h=>h.p);
   let lo=Math.min(...vals),hi=Math.max(...vals);
   if(lo===hi){lo-=1;hi+=1;}
   const padY=(hi-lo)*0.12;lo-=padY;hi+=padY;
   const X=i=>L+(W-L-R)*(hist.length>1?i/(hist.length-1):0.5);
   const Y=p=>T+(H-T-B)*(1-(p-lo)/(hi-lo));
+  const DK=document.documentElement.dataset.theme==='dark';
+  const GRID=DK?'#2a3347':'#eef1f6', LBL=DK?'#8b95ad':'#8a93a3', HOV=DK?'#4a5touch':'#c6cfdd';
   const color=vals[vals.length-1]>vals[0]?UP:(vals[vals.length-1]<vals[0]?DOWN:FLAT);
   const yLabel=p=>(hi-lo)<10?p.toFixed(1):Math.round(p).toLocaleString();
   let g='';
   for(let k=0;k<=4;k++){
     const p=lo+(hi-lo)*k/4,y=Y(p);
-    g+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#eef1f6"/>`+
-       `<text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" fill="#8a93a3">${yLabel(p)}</text>`;
+    g+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="${GRID}"/>`+
+       `<text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" fill="${LBL}">${yLabel(p)}</text>`;
   }
   const lblIdx=hist.length<=2?hist.map((_,i)=>i):[0,Math.floor((hist.length-1)/2),hist.length-1];
-  for(const i of lblIdx)g+=`<text x="${X(i)}" y="${H-10}" text-anchor="middle" font-size="11" fill="#8a93a3">${hist[i].d.length>6?hist[i].d.slice(-5):hist[i].d}</text>`;
+  for(const i of lblIdx)g+=`<text x="${X(i)}" y="${H-10}" text-anchor="middle" font-size="11" fill="${LBL}">${hist[i].d.length>6?hist[i].d.slice(-5):hist[i].d}</text>`;
   if(rangeN!==-1&&s.avg30){
     const ay=Y(Math.min(Math.max(s.avg30,lo),hi));
     g+=`<line x1="${L}" y1="${ay}" x2="${W-R}" y2="${ay}" stroke="#7a8b3c" stroke-dasharray="5 4" stroke-width="1.2"/>`+
@@ -393,7 +522,7 @@ function drawChart(){
   let hover='';
   if(hoverX>=0&&hist.length>1){
     const i=Math.max(0,Math.min(hist.length-1,Math.round(hoverX/(W-L-R)*(hist.length-1))));
-    hover=`<line x1="${X(i)}" y1="${T}" x2="${X(i)}" y2="${H-B}" stroke="#c6cfdd" stroke-dasharray="3 3"/>`+
+    hover=`<line x1="${X(i)}" y1="${T}" x2="${X(i)}" y2="${H-B}" stroke="${HOV}" stroke-dasharray="3 3"/>`+
           `<circle cx="${X(i)}" cy="${Y(vals[i])}" r="4" fill="#fff" stroke="${color}" stroke-width="2"/>`;
     const tt=document.getElementById('tooltip');
     tt.style.display='block';
@@ -421,6 +550,20 @@ document.getElementById('catSel').onchange=e=>{fCat=e.target.value;renderRows();
 document.getElementById('sortSel').onchange=e=>{fSort=e.target.value;renderRows();};
 document.getElementById('onlyFav').onclick=e=>{onlyFav=!onlyFav;e.target.textContent=onlyFav?'★ 已只看收藏':'★ 只看收藏';renderRows();};
 document.getElementById('fadvChip').onclick=()=>{fAdv=null;syncAdv();renderRows();};
+function applyTheme(t){
+  document.documentElement.dataset.theme=t;
+  localStorage.setItem('pth',t);
+  document.getElementById('thBtn').textContent=t==='dark'?'☀️ 亮色':'🌙 主题';
+  if(ITEMS.length)drawChart();
+}
+document.getElementById('thBtn').onclick=()=>applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
+applyTheme(localStorage.getItem('pth')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+document.getElementById('buildBtn').onclick=()=>{
+  const p=document.getElementById('buildPanel');
+  p.style.display=p.style.display==='none'?'':'none';
+  if(p.style.display!=='none')renderBuild();
+};
+document.getElementById('buildClear').onclick=()=>{BUILD={};saveBuild();renderBuild();};
 document.getElementById('exportCsv').onclick=()=>{
   let csv='分类,商品,参考价,京东价,今日涨跌%,白菜价,URL\n';
   for(const it of ITEMS){
